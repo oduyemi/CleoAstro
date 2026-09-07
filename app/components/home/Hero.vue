@@ -536,7 +536,7 @@ onBeforeUnmount(() => {
       @click="openBooking"
     >
       <span
-        class="text-[7px] uppercase tracking-[0.4em] text-[#E8E7E1]/55 transition-colors duration-500 group-hover:text-[#E8E7E1]"
+        class="text-[7px] uppercase tracking-[0.4em] text-yellow/75 transition-colors duration-500 group-hover:text-[#E8E7E1]"
       >
         Begin a reading
       </span>
