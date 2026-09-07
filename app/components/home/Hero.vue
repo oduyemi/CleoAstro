@@ -368,10 +368,15 @@ onBeforeUnmount(() => {
         class="hero-description mt-7 ml-[clamp(2rem,8vw,9rem)] max-w-[300px] sm:mt-9 sm:max-w-[360px]"
       >
         <p
-          class="text-[11px] font-light leading-[1.7] text-[#E8E7E1]/50 sm:text-xs"
+          class="text-[14px] font-light leading-[1.7] text-[#E8E7E1]/50 sm:text-xs"
         >
           Read the deeper patterns behind your relationships,
-          purpose, and the experiences shaping your life.
+          purpose, and the experiences shaping your life. 
+          Through Vedic astrology and intuitive reading, I 
+          help you explore the purpose, and experiences 
+          unfolding in your life.
+
+
         </p>
       </div>
     </div>
