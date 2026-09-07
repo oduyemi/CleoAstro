@@ -1,1291 +1,794 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import {
-  ArrowRight,
-  ChevronDown,
-  Compass,
+  ArrowUpRight,
   Moon,
   Orbit,
   Sparkles,
-  Sun,
   Zap,
 } from "lucide-vue-next";
-import { motion, useReducedMotion } from "motion-v";
-import { Button } from "@/components/ui/button";
 import BookAReadingDialog from "@/components/booking/BookAReadingDialog.vue";
 
-const prefersReducedMotion = useReducedMotion();
+type Planet = {
+  name: string;
+  degree: string;
+  sign: string;
+  meaning: string;
+  icon: typeof Moon;
+};
+
 const bookingOpen = ref(false);
+const isHovering = ref(false);
+const prefersReducedMotion = ref(false);
+
+const pointerX = ref(0);
+const pointerY = ref(0);
+
+const planets: Planet[] = [
+  {
+    name: "Moon",
+    degree: "12°",
+    sign: "Libra",
+    meaning: "Emotional balance",
+    icon: Moon,
+  },
+  {
+    name: "Mercury",
+    degree: "24°",
+    sign: "Leo",
+    meaning: "Expression",
+    icon: Zap,
+  },
+  {
+    name: "Venus",
+    degree: "08°",
+    sign: "Cancer",
+    meaning: "Connection",
+    icon: Sparkles,
+  },
+];
+
+const chartStyle = computed(() => {
+  if (prefersReducedMotion.value || !isHovering.value) {
+    return {
+      transform: "translate3d(-50%, -50%, 0)",
+    };
+  }
+
+  return {
+    transform: `
+      translate3d(
+        calc(-50% + ${pointerX.value * 0.006}px),
+        calc(-50% + ${pointerY.value * 0.006}px),
+        0
+      )
+    `,
+  };
+});
+
+const portraitStyle = computed(() => {
+  if (prefersReducedMotion.value || !isHovering.value) {
+    return {
+      transform: "translateX(-50%)",
+    };
+  }
+
+  return {
+    transform: `
+      translateX(calc(-50% + ${pointerX.value * 0.012}px))
+      translateY(${pointerY.value * 0.008}px)
+    `,
+  };
+});
+
+const handlePointerMove = (event: PointerEvent) => {
+  if (prefersReducedMotion.value) return;
+
+  const element = event.currentTarget as HTMLElement;
+  const rect = element.getBoundingClientRect();
+
+  pointerX.value = event.clientX - (rect.left + rect.width / 2);
+  pointerY.value = event.clientY - (rect.top + rect.height / 2);
+};
+
+const handlePointerEnter = () => {
+  isHovering.value = true;
+};
+
+const handlePointerLeave = () => {
+  isHovering.value = false;
+  pointerX.value = 0;
+  pointerY.value = 0;
+};
 
 const openBooking = () => {
   bookingOpen.value = true;
 };
 
-const handleReadingSelection = (reading: {
-  id: string;
-  name: string;
-  description: string;
-  duration: string;
-  price: number;
-}) => {
-  /*
-   * The selected reading is now available here.
-   *
-   * Later, this is where you can:
-   *
-   * 1. Open your booking form
-   * 2. Navigate to /book/[reading]
-   * 3. Launch Calendly
-   * 4. Connect Paystack
-   * 5. Store the selected service
-   */
-
+const handleReadingSelection = (reading: unknown) => {
   console.log("Selected reading:", reading);
 };
 
-const planetaryUpdates = [
-  {
-    planet: "Moon",
-    position: "12° Libra",
-    influence: "Emotional balance & relationships",
-    icon: Moon,
-  },
-  {
-    planet: "Mercury",
-    position: "24° Leo",
-    influence: "Expression & communication",
-    icon: Zap,
-  },
-  {
-    planet: "Venus",
-    position: "08° Cancer",
-    influence: "Connection & values",
-    icon: Sparkles,
-  },
-];
+let motionQuery: MediaQueryList | null = null;
 
-const stars = Array.from({ length: 65 }, (_, index) => ({
-  id: index,
-  left: `${(index * 37 + 11) % 100}%`,
-  top: `${(index * 61 + 7) % 100}%`,
-  delay: (index % 11) * 0.45,
-  duration: 3.5 + (index % 6) * 0.7,
-  size:
-    index % 9 === 0
-      ? "2.5px"
-      : index % 3 === 0
-        ? "2px"
-        : "1px",
-}));
+const updateMotionPreference = () => {
+  if (typeof window === "undefined") return;
 
-const easeOut = [0.22, 1, 0.36, 1] as const;
-const easeInOut = "easeInOut" as const;
-const linear = "linear" as const;
-const easeOutSimple = "easeOut" as const;
+  prefersReducedMotion.value = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+};
 
-const heroOpacity = prefersReducedMotion.value
-  ? 1
-  : [0, 1];
+onMounted(() => {
+  motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const heroY = prefersReducedMotion.value
-  ? 0
-  : [24, 0];
+  updateMotionPreference();
 
-const heroX = prefersReducedMotion.value
-  ? 0
-  : [20, 0];
+  motionQuery.addEventListener(
+    "change",
+    updateMotionPreference,
+  );
+});
 
-const portraitScale = prefersReducedMotion.value
-  ? 1
-  : [1.045, 1];
-
-const portraitX = prefersReducedMotion.value
-  ? 0
-  : [28, 0];
-
-const portraitY = prefersReducedMotion.value
-  ? 0
-  : [0, -5, 0, 4, 0];
-
-const portraitFloatingScale = prefersReducedMotion.value
-  ? 1
-  : [1, 1.008, 1.012, 1.006, 1];
-
-const portraitFloatingX = prefersReducedMotion.value
-  ? 0
-  : [0, -2, 0, 2, 0];
-
-const cardFloatingY = prefersReducedMotion.value
-  ? 0
-  : [0, -7, 0, 6, 0];
-
-const cardFloatingRotateX = prefersReducedMotion.value
-  ? 0
-  : [0, 0.25, 0, -0.2, 0];
-
-const cardFloatingRotateY = prefersReducedMotion.value
-  ? 0
-  : [0, 0.4, 0, -0.35, 0];
+onBeforeUnmount(() => {
+  motionQuery?.removeEventListener(
+    "change",
+    updateMotionPreference,
+  );
+});
 </script>
 
 <template>
   <section
-    class="relative isolate flex min-h-[700px] items-center overflow-hidden bg-[#080611] pt-16 sm:min-h-[720px] lg:min-h-[760px] lg:pt-20"
+    class="astral-stage relative min-h-[100svh] overflow-hidden text-white"
+    @pointermove="handlePointerMove"
+    @pointerenter="handlePointerEnter"
+    @pointerleave="handlePointerLeave"
   >
-    <div
-      class="pointer-events-none absolute inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
-      <!-- Main image -->
+    <!-- =========================================================
+         CELESTIAL BACKGROUND
+    ========================================================== -->
 
-      <motion.img
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <!-- Base midnight -->
+      <div class="absolute inset-0 bg-[#050814]" />
+
+      <!-- Atmospheric blue horizon -->
+      <div
+        class="absolute bottom-[-25%] left-1/2 h-[75%] w-[90%] -translate-x-1/2 rounded-[50%] bg-[#182653]/20 blur-[120px]"
+      />
+
+      <!-- Indigo atmospheric layer -->
+      <div
+        class="absolute left-[12%] top-[18%] h-[45%] w-[38%] rounded-full bg-[#101A35]/45 blur-[130px]"
+      />
+
+      <!-- Very restrained lunar illumination -->
+      <div
+        class="absolute right-[15%] top-[10%] h-[260px] w-[260px] rounded-full bg-[#34447A]/10 blur-[110px]"
+      />
+
+      <!-- Technical horizon -->
+      <div
+        class="absolute left-0 right-0 top-[61%] h-px bg-[#858EBA]/10"
+      />
+
+      <!-- Fine architectural lines -->
+      <div
+        class="absolute bottom-0 left-[7%] top-0 hidden w-px bg-[#858EBA]/[0.055] lg:block"
+      />
+
+      <div
+        class="absolute bottom-0 right-[7%] top-0 hidden w-px bg-[#858EBA]/[0.055] lg:block"
+      />
+
+      <!-- Fine atmospheric grid -->
+      <div
+        class="absolute inset-0 opacity-[0.025]"
+        style="
+          background-image:
+            linear-gradient(rgba(133,142,186,.7) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(133,142,186,.7) 1px, transparent 1px);
+          background-size: 90px 90px;
+        "
+      />
+
+      <!-- Sparse celestial points -->
+      <span
+        v-for="star in 26"
+        :key="star"
+        class="absolute h-[2px] w-[2px] rounded-full bg-[#858EBA]"
+        :style="{
+          left: `${(star * 47.3) % 100}%`,
+          top: `${(star * 71.7) % 100}%`,
+          opacity: 0.08 + ((star * 19) % 35) / 100,
+        }"
+      />
+    </div>
+
+    <!-- =========================================================
+         BRAND MARK
+    ========================================================== -->
+
+    <div
+      class="absolute left-5 top-7 z-50 flex items-center gap-3 sm:left-8 lg:left-10"
+    >
+      <div
+        class="flex h-8 w-8 items-center justify-center border border-[#858EBA]/25"
+      >
+        <Orbit
+          class="h-4 w-4 text-[#858EBA]/75"
+          :stroke-width="1"
+        />
+      </div>
+
+      <div>
+        <div
+          class="text-[9px] uppercase tracking-[0.42em] text-[#E8E7E1]"
+        >
+          Cleo Astro
+        </div>
+
+        <div
+          class="mt-1 text-[6px] uppercase tracking-[0.36em] text-[#858EBA]/40"
+        >
+          Vedic astrology
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         LIVE SKY
+    ========================================================== -->
+
+    <div
+      class="absolute right-5 top-7 z-50 flex items-center gap-4 sm:right-8 lg:right-10"
+    >
+      <div class="hidden text-right sm:block">
+        <div
+          class="text-[6px] uppercase tracking-[0.35em] text-[#858EBA]/40"
+        >
+          Current sky
+        </div>
+
+        <div
+          class="mt-1 font-mono text-[7px] tracking-[0.2em] text-[#E8E7E1]/55"
+        >
+          07.09.26
+        </div>
+      </div>
+
+      <span class="h-px w-6 bg-[#858EBA]/20" />
+
+      <div class="flex items-center gap-2">
+        <span
+          class="relative h-1.5 w-1.5 rounded-full bg-[#858EBA]"
+        />
+
+        <span
+          class="text-[7px] uppercase tracking-[0.32em] text-[#858EBA]/55"
+        >
+          Live sky
+        </span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         ASTRONOMICAL FIELD
+    ========================================================== -->
+
+    <div
+      class="pointer-events-none absolute inset-0"
+      style="perspective: 1600px"
+    >
+      <div
+        class="absolute left-1/2 top-[54%] z-10 h-[min(78vw,1000px)] w-[min(112vw,1400px)] transition-transform duration-[1400ms] ease-out"
+        :style="chartStyle"
+      >
+        <!-- Primary ellipse -->
+        <div
+          class="absolute left-1/2 top-1/2 h-[53%] w-[92%] -translate-x-1/2 -translate-y-1/2 rotate-[-11deg] rounded-[50%] border border-[#858EBA]/20"
+        />
+
+        <!-- Secondary ellipse -->
+        <div
+          class="absolute left-1/2 top-1/2 h-[38%] w-[77%] -translate-x-1/2 -translate-y-1/2 rotate-[15deg] rounded-[50%] border border-[#858EBA]/10"
+        />
+
+        <!-- Inner orbit -->
+        <div
+          class="absolute left-1/2 top-1/2 h-[23%] w-[58%] -translate-x-1/2 -translate-y-1/2 rotate-[-24deg] rounded-[50%] border border-dashed border-[#858EBA]/10"
+        />
+
+        <!-- Vertical axis -->
+        <div
+          class="absolute bottom-[8%] left-1/2 top-[8%] w-px -translate-x-1/2 bg-[#858EBA]/[0.07]"
+        />
+
+        <!-- Horizontal axis -->
+        <div
+          class="absolute left-[7%] right-[7%] top-1/2 h-px -translate-y-1/2 bg-[#858EBA]/[0.07]"
+        />
+
+        <!-- Rotating inner celestial line -->
+        <div
+          class="absolute left-1/2 top-1/2 h-[62%] w-[62%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#858EBA]/[0.055]"
+          :class="{
+            'animate-[spin_110s_linear_infinite]':
+              !prefersReducedMotion,
+          }"
+        />
+
+        <!-- Degree ticks -->
+        <div
+          v-for="tick in 36"
+          :key="tick"
+          class="absolute left-1/2 top-1/2 h-full w-px -translate-x-1/2 -translate-y-1/2"
+          :style="{
+            transform: `translate(-50%, -50%) rotate(${tick * 10}deg)`,
+          }"
+        >
+          <span
+            class="mx-auto mt-[8%] block h-2 w-px bg-[#858EBA]/15"
+            :class="{
+              'h-4 bg-[#858EBA]/30': tick % 3 === 0,
+            }"
+          />
+        </div>
+
+        <!-- Central coordinate -->
+        <div
+          class="absolute left-1/2 top-1/2 h-[17%] w-[17%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#858EBA]/10"
+        />
+
+        <div
+          class="absolute left-1/2 top-1/2 h-[8%] w-[8%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#858EBA]/15"
+        />
+
+        <!-- Centre point -->
+        <div
+          class="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#E8E7E1]/70"
+        />
+
+        <!-- Coordinate numbers -->
+        <span
+          class="absolute left-[7%] top-[49%] font-mono text-[6px] tracking-[0.2em] text-[#858EBA]/30"
+        >
+          000°
+        </span>
+
+        <span
+          class="absolute right-[7%] top-[49%] font-mono text-[6px] tracking-[0.2em] text-[#858EBA]/30"
+        >
+          180°
+        </span>
+
+        <span
+          class="absolute left-[49%] top-[5%] font-mono text-[6px] tracking-[0.2em] text-[#858EBA]/30"
+        >
+          090°
+        </span>
+
+        <span
+          class="absolute bottom-[5%] left-[48%] font-mono text-[6px] tracking-[0.2em] text-[#858EBA]/30"
+        >
+          270°
+        </span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         HERO TYPOGRAPHY
+    ========================================================== -->
+
+    <div
+      class="absolute left-5 top-[17%] z-40 sm:left-[10%] lg:top-[18%]"
+    >
+      <div
+        class="mb-5 flex items-center gap-3"
+      >
+        <span
+          class="h-px w-9 bg-[#858EBA]/60"
+        />
+
+        <span
+          class="text-[7px] uppercase tracking-[0.42em] text-[#858EBA]/60"
+        >
+          Vedic astrology · intuitive guidance
+        </span>
+      </div>
+
+      <h1
+        class="font-serif text-[clamp(4.4rem,10vw,10.5rem)] font-normal leading-[0.75] tracking-[-0.075em] text-[#E8E7E1]"
+      >
+        <span class="block">
+          The sky
+        </span>
+
+        <span
+          class="ml-[10vw] block italic text-[#858EBA]"
+        >
+          remembers.
+        </span>
+      </h1>
+
+      <div
+        class="mt-7 ml-[10vw] flex items-center gap-3"
+      >
+        <span
+          class="h-px w-8 bg-[#858EBA]/30"
+        />
+
+        <span
+          class="text-[7px] uppercase tracking-[0.3em] text-[#858EBA]/45"
+        >
+          Read the patterns
+        </span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         SAMMY
+         IMPORTANT: ORIGINAL COLOUR IS PRESERVED
+    ========================================================== -->
+
+    <div
+      class="pointer-events-none absolute bottom-[-1%] left-1/2 z-20 w-[min(108vw,880px)] sm:w-[min(88vw,880px)] lg:w-[min(62vw,880px)]"
+      :style="portraitStyle"
+    >
+      <!-- Cool atmospheric halo behind him -->
+      <div
+        class="absolute left-1/2 top-[16%] h-[50%] w-[55%] -translate-x-1/2 rounded-full bg-[#34447A]/12 blur-[90px]"
+      />
+
+      <!-- Fine celestial ellipse behind portrait -->
+      <div
+        class="absolute left-1/2 top-[8%] h-[53%] w-[46%] -translate-x-1/2 rotate-[7deg] rounded-[50%] border border-[#858EBA]/10"
+      />
+
+      <div
+        class="absolute left-1/2 top-[13%] h-[45%] w-[39%] -translate-x-1/2 -rotate-[10deg] rounded-[50%] border border-dashed border-[#858EBA]/[0.07]"
+      />
+
+      <!-- ORIGINAL ARTWORK — NO GRAYSCALE -->
+      <img
         src="/images/sammy.png"
         alt="Sammy, Vedic astrologer and intuitive reader"
-        class="absolute left-1/2 top-1/2 h-[94%] w-[115%] -translate-x-[24%] -translate-y-1/2 object-contain object-right opacity-[0.92] sm:h-[96%] sm:w-[105%] sm:-translate-x-[20%] lg:left-auto lg:right-[-4%] lg:h-[104%] lg:w-[72%] lg:translate-x-0"
-        :initial="{
-          opacity: 0,
-          scale: 1.045,
-          x: 28,
-        }"
-        :animate="{
-          opacity: 0.92,
-          scale: portraitFloatingScale,
-          x: portraitFloatingX,
-          y: portraitY,
-        }"
-        :transition="{
-          opacity: {
-            duration: 1.4,
-            delay: 0.1,
-            ease: easeOut,
-          },
-          scale: {
-            duration: 18,
-            repeat: Infinity,
-            ease: easeInOut,
-          },
-          x: {
-            duration: 18,
-            repeat: Infinity,
-            ease: easeInOut,
-          },
-          y: {
-            duration: 18,
-            repeat: Infinity,
-            ease: easeInOut,
-          },
-        }"
+        draggable="false"
+        class="relative z-10 block h-auto md:w-5/6 sm:w-full select-none object-contain"
       />
 
-      <!-- Left readability layer -->
-
+      <!-- Subtle floor reflection / grounding -->
       <div
-        class="absolute inset-0 bg-gradient-to-r from-[#080611] via-[#080611]/95 via-[38%] to-[#080611]/15"
-      />
-
-      <!-- Desktop portrait veil -->
-
-      <div
-        class="absolute inset-y-0 right-0 hidden w-[65%] bg-gradient-to-r from-transparent via-[#080611]/10 to-transparent lg:block"
-      />
-
-      <!-- Mobile readability -->
-
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-[#080611] via-[#080611]/40 to-[#080611]/20 lg:hidden"
-      />
-
-      <!-- Bottom fade -->
-
-      <div
-        class="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#080611] via-[#080611]/70 to-transparent"
-      />
-
-      <!-- Top fade -->
-
-      <div
-        class="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#080611]/80 to-transparent"
-      />
-
-      <motion.div
-        class="absolute -left-[280px] -top-[180px] h-[620px] w-[620px] rounded-full bg-violet-800/[0.08] blur-[160px]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                x: [0, 35, 0, -25, 0],
-                y: [0, 20, 0, -15, 0],
-                scale: [1, 1.06, 1.1, 1.04, 1],
-                opacity: [0.55, 0.7, 0.55, 0.65, 0.55],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 24,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
-      />
-
-      <motion.div
-        class="absolute right-[-180px] top-[10%] h-[650px] w-[650px] rounded-full bg-amber-300/[0.045] blur-[170px]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                x: [0, -25, 0, 20, 0],
-                y: [0, 25, 0, -20, 0],
-                scale: [1, 1.08, 1.14, 1.06, 1],
-                opacity: [0.45, 0.6, 0.5, 0.62, 0.45],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 28,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
-      />
-
-      <motion.div
-        class="absolute -bottom-[280px] right-[15%] h-[600px] w-[600px] rounded-full bg-indigo-900/[0.07] blur-[160px]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                x: [0, -30, 0, 25, 0],
-                scale: [1, 1.08, 1, 1.06, 1],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 30,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
+        class="absolute bottom-[1%] left-1/2 h-8 w-[58%] -translate-x-1/2 rounded-[50%] bg-[#34447A]/15 blur-2xl"
       />
     </div>
 
-    <div
-      class="pointer-events-none absolute inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
-      <motion.span
-        v-for="star in stars"
-        :key="star.id"
-        class="absolute rounded-full bg-white"
-        :style="{
-          left: star.left,
-          top: star.top,
-          width: star.size,
-          height: star.size,
-        }"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                opacity: [0.08, 0.45, 0.75, 0.35, 0.08],
-                scale: [0.7, 1, 1.25, 1, 0.7],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: star.duration,
-                delay: star.delay,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
-      />
-    </div>
+    <!-- =========================================================
+         PLANETARY ANNOTATIONS
+    ========================================================== -->
 
     <div
-      class="pointer-events-none absolute right-[-270px] top-1/2 hidden h-[760px] w-[760px] -translate-y-1/2 lg:block"
-      aria-hidden="true"
+      class="absolute left-[12%] top-[47%] z-40 hidden lg:block"
     >
-      <motion.div
-        class="absolute inset-[-80px] rounded-full border border-amber-100/[0.018]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                scale: [1, 1.035, 1],
-                opacity: [0.4, 0.7, 0.4],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 9,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
-      />
-
-      <motion.div
-        class="absolute inset-0 rounded-full border border-amber-100/[0.045]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: 360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 100,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute left-[14%] top-[-3px] h-3 w-3 rounded-full bg-amber-200 shadow-[0_0_25px_rgba(253,230,138,0.9)]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [1, 1.3, 1],
-                  opacity: [0.7, 1, 0.7],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
-
-      <motion.div
-        class="absolute inset-[65px] rounded-full border border-amber-100/[0.055]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: -360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 67,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute bottom-[12%] left-[-4px] h-2.5 w-2.5 rounded-full bg-violet-200 shadow-[0_0_20px_rgba(196,181,253,0.9)]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [1, 1.25, 1],
-                  opacity: [0.5, 1, 0.5],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 4.5,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
-
-      <motion.div
-        class="absolute inset-[135px] rounded-full border border-violet-200/[0.05]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: 360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 52,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute right-[7%] top-[11%] h-2 w-2 rounded-full bg-white shadow-[0_0_18px_white]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [0.8, 1.25, 0.8],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
-
-      <motion.div
-        class="absolute inset-[205px] rounded-full border border-white/[0.04]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: -360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 40,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute bottom-[5%] right-[19%] h-1.5 w-1.5 rounded-full bg-amber-100 shadow-[0_0_15px_rgba(253,230,138,0.85)]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  opacity: [0.4, 1, 0.4],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
-
-      <motion.div
-        class="absolute inset-[275px] rounded-full border border-amber-100/[0.035]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: 360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 30,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute left-[3%] top-[25%] h-1 w-1 rounded-full bg-violet-100 shadow-[0_0_12px_rgba(221,214,254,0.8)]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [0.7, 1.4, 0.7],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
-
-      <motion.div
-        class="absolute left-1/2 top-1/2 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                scale: [1, 1.045, 1, 1.035, 1],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 8,
-                repeat: Infinity,
-                ease: easeInOut,
-              }
-        "
-      >
-        <motion.div
-          class="absolute inset-0 rounded-full bg-amber-200/[0.035] blur-2xl"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [0.9, 1.25, 0.9],
-                  opacity: [0.35, 0.7, 0.35],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-
+      <div class="flex items-center gap-4">
         <div
-          class="relative flex h-16 w-16 items-center justify-center rounded-full border border-amber-200/20 bg-amber-100/[0.025] shadow-[0_0_90px_rgba(253,230,138,0.12)]"
+          class="flex h-7 w-7 items-center justify-center rounded-full border border-[#858EBA]/25 bg-[#080D1C]"
         >
-          <Sun class="h-5 w-5 text-amber-200/60" />
+          <Moon
+            class="h-3 w-3 text-[#858EBA]"
+            :stroke-width="1"
+          />
         </div>
-      </motion.div>
-    </div>
 
-    <div
-      class="pointer-events-none absolute -right-[180px] top-[15%] h-[380px] w-[380px] opacity-60 lg:hidden"
-      aria-hidden="true"
-    >
-      <motion.div
-        class="absolute inset-0 rounded-full border border-amber-100/[0.035]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: 360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 90,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      />
+        <div>
+          <div
+            class="text-[7px] uppercase tracking-[0.3em] text-[#858EBA]/55"
+          >
+            Moon
+          </div>
 
-      <motion.div
-        class="absolute inset-[55px] rounded-full border border-violet-200/[0.035]"
-        :animate="
-          prefersReducedMotion
-            ? {}
-            : {
-                rotate: -360,
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 55,
-                repeat: Infinity,
-                ease: linear,
-              }
-        "
-      >
-        <motion.span
-          class="absolute left-[12%] top-[-2px] h-2 w-2 rounded-full bg-amber-200/70 shadow-[0_0_15px_rgba(253,230,138,0.8)]"
-          :animate="
-            prefersReducedMotion
-              ? {}
-              : {
-                  scale: [1, 1.25, 1],
-                }
-          "
-          :transition="
-            prefersReducedMotion
-              ? {}
-              : {
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: easeInOut,
-                }
-          "
-        />
-      </motion.div>
+          <div
+            class="mt-1 font-mono text-[10px] text-[#E8E7E1]/65"
+          >
+            12° Libra
+          </div>
+        </div>
+      </div>
 
       <div
-        class="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-200/10 bg-amber-100/[0.02]"
+        class="ml-3 mt-3 h-16 w-px bg-[#858EBA]/15"
+      />
+
+      <div
+        class="ml-3 mt-2 text-[6px] uppercase tracking-[0.25em] text-[#858EBA]/35"
       >
-        <div
-          class="absolute inset-0 rounded-full bg-amber-200/[0.035] blur-xl"
-        />
+        Emotional balance
       </div>
     </div>
 
     <div
-      class="relative z-10 mx-auto flex w-full max-w-7xl items-center px-6 py-12 lg:px-8 lg:py-16"
+      class="absolute right-[10%] top-[34%] z-40 hidden lg:block"
     >
-      <div
-        class="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_0.72fr] xl:gap-16"
-      >
-        <div class="relative max-w-2xl">
-          <motion.div
-            class="mb-5 inline-flex items-center gap-3 rounded-full border border-amber-200/15 bg-black/20 px-3.5 py-1.5 backdrop-blur-md"
-            :initial="{
-              opacity: 0,
-              y: 18,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.75,
-              delay: 0.15,
-              ease: easeOut,
-            }"
+      <div class="flex items-center gap-4">
+        <div>
+          <div
+            class="text-right text-[7px] uppercase tracking-[0.3em] text-[#858EBA]/55"
           >
-            <span class="relative flex h-1.5 w-1.5">
-              <motion.span
-                class="absolute inline-flex h-full w-full rounded-full bg-amber-200"
-                :animate="
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        scale: [1, 2, 1],
-                        opacity: [0.45, 0, 0.45],
-                      }
-                "
-                :transition="
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        duration: 2.6,
-                        repeat: Infinity,
-                        ease: easeOutSimple,
-                      }
-                "
-              />
+            Mercury
+          </div>
 
-              <span
-                class="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-200 shadow-[0_0_10px_rgba(253,230,138,0.7)]"
-              />
-            </span>
-
-            <span
-              class="text-[8px] uppercase tracking-[0.28em] text-amber-100/65"
-            >
-              Vedic Astrology · Intuitive Guidance
-            </span>
-          </motion.div>
-
-          <motion.p
-            class="font-serif text-lg italic text-amber-100/80 sm:text-xl"
-            :initial="{
-              opacity: 0,
-              y: 20,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.8,
-              delay: 0.25,
-              ease: easeOut,
-            }"
+          <div
+            class="mt-1 text-right font-mono text-[10px] text-[#E8E7E1]/65"
           >
-            I'm Sammy.
-          </motion.p>
-
-          <motion.h1
-            class="mt-2 max-w-[680px] font-serif text-[3rem] leading-[0.96] tracking-[-0.045em] text-white sm:text-5xl lg:text-[62px] xl:text-[70px]"
-            :initial="{
-              opacity: 0,
-              y: 24,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.9,
-              delay: 0.35,
-              ease: easeOut,
-            }"
-          >
-            Understand the
-
-            <motion.span
-              class="block bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-400 bg-clip-text pb-1 text-transparent"
-              :animate="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      backgroundPosition: [
-                        '0% 50%',
-                        '100% 50%',
-                        '0% 50%',
-                      ],
-                    }
-              "
-              :transition="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      duration: 9,
-                      repeat: Infinity,
-                      ease: linear,
-                    }
-              "
-              style="background-size: 220% 220%"
-            >
-              patterns
-            </motion.span>
-
-            shaping your life.
-          </motion.h1>
-
-          <motion.p
-            class="mt-5 max-w-xl text-sm leading-6 text-white/55 sm:text-base sm:leading-7"
-            :initial="{
-              opacity: 0,
-              y: 22,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.85,
-              delay: 0.5,
-              ease: easeOut,
-            }"
-          >
-            Through Vedic astrology and intuitive reading, I help you explore
-            the deeper patterns, relationships, purpose, and experiences
-            unfolding in your life.
-          </motion.p>
-
-          <motion.div
-            class="mt-6 flex flex-col gap-2.5 sm:flex-row"
-            :initial="{
-              opacity: 0,
-              y: 20,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.85,
-              delay: 0.65,
-              ease: easeOut,
-            }"
-          >
-            <motion.div
-              :whileHover="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      y: -3,
-                      scale: 1.02,
-                    }
-              "
-              :whileTap="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      scale: 0.98,
-                    }
-              "
-              :transition="{
-                duration: 0.25,
-              }"
-            >
-              <Button
-                size="lg"
-                class="group h-11 rounded-full bg-amber-100 px-6 text-sm blu shadow-[0_0_30px_rgba(253,230,138,0.10)] hover:bg-amber-200"
-                @click="openBooking"
-              >
-                Book a Reading
-
-                <ArrowRight
-                  class="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </Button>
-            </motion.div>
-
-            <motion.div
-              :whileHover="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      y: -3,
-                    }
-              "
-              :whileTap="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      scale: 0.98,
-                    }
-              "
-              :transition="{
-                duration: 0.25,
-              }"
-            >
-              <NuxtLink to="/#planets">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  class="h-11 rounded-full border-white/15 bg-white/[0.025] px-6 text-sm text-white backdrop-blur-md hover:bg-white/10"
-                >
-                  Read The Sky
-                </Button>
-              </NuxtLink>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            class="mt-7 flex max-w-lg items-start gap-3 border-t border-white/10 pt-5"
-            :initial="{
-              opacity: 0,
-              y: 18,
-            }"
-            :animate="{
-              opacity: heroOpacity,
-              y: heroY,
-            }"
-            :transition="{
-              duration: 0.85,
-              delay: 0.8,
-              ease: easeOut,
-            }"
-          >
-            <div
-              class="mt-1 h-8 w-px bg-gradient-to-b from-amber-200/30 to-transparent"
-            />
-
-            <p class="text-[11px] leading-5 text-white/35 sm:text-xs">
-              My intention is not to tell you how to live your life, but to
-              help you pause, reflect, and reconnect with your own inner
-              wisdom.
-            </p>
-          </motion.div>
+            24° Leo
+          </div>
         </div>
 
-        <motion.div
-          class="relative mt-6 flex justify-center lg:mt-0 lg:justify-end"
-          :initial="{
-            opacity: 0,
-            x: 35,
-            scale: 0.96,
-          }"
-          :animate="{
-            opacity: 1,
-            x: 0,
-            scale: 1,
-          }"
-          :transition="{
-            duration: 1.1,
-            delay: 0.45,
-            ease: easeOut,
-          }"
+        <div
+          class="flex h-7 w-7 items-center justify-center rounded-full border border-[#858EBA]/25 bg-[#080D1C]"
         >
-          <motion.div
-            class="relative w-full max-w-[360px]"
-            :animate="{
-              y: cardFloatingY,
-              rotateX: cardFloatingRotateX,
-              rotateY: cardFloatingRotateY,
-            }"
-            :transition="
-              prefersReducedMotion
-                ? {}
-                : {
-                    duration: 11,
-                    repeat: Infinity,
-                    ease: easeInOut,
-                  }
-            "
-            style="transform-style: preserve-3d"
-          >
-            <motion.div
-              class="absolute -inset-8 rounded-[45px] bg-amber-200/[0.02] blur-3xl"
-              :animate="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      scale: [1, 1.08, 1],
-                      opacity: [0.35, 0.65, 0.35],
-                    }
-              "
-              :transition="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: easeInOut,
-                    }
-              "
-            />
+          <Zap
+            class="h-3 w-3 text-[#858EBA]"
+            :stroke-width="1"
+          />
+        </div>
+      </div>
 
-            <motion.div
-              class="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#100d1a]/65 p-5 shadow-2xl backdrop-blur-xl"
-              :whileHover="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      borderColor: 'rgba(253,230,138,0.18)',
-                    }
-              "
-              :transition="{
-                duration: 0.5,
-              }"
-            >
-              <motion.div
-                class="absolute right-[-20px] top-[-20px] h-40 w-40 rounded-full bg-amber-200/[0.055] blur-3xl"
-                :animate="
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        x: [0, -12, 0],
-                        y: [0, 12, 0],
-                        scale: [1, 1.18, 1],
-                      }
-                "
-                :transition="
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        duration: 9,
-                        repeat: Infinity,
-                        ease: easeInOut,
-                      }
-                "
-              />
+      <div
+        class="ml-auto mr-3 mt-3 h-12 w-px bg-[#858EBA]/15"
+      />
 
-              <div class="relative">
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <motion.span
-                        class="h-1.5 w-1.5 rounded-full bg-amber-200 shadow-[0_0_8px_rgba(253,230,138,0.7)]"
-                        :animate="
-                          prefersReducedMotion
-                            ? {}
-                            : {
-                                opacity: [0.3, 1, 0.3],
-                                scale: [0.8, 1.15, 0.8],
-                              }
-                        "
-                        :transition="
-                          prefersReducedMotion
-                            ? {}
-                            : {
-                                duration: 2.8,
-                                repeat: Infinity,
-                                ease: easeInOut,
-                              }
-                        "
-                      />
-
-                      <span
-                        class="text-[7px] uppercase tracking-[0.3em] text-amber-100/40"
-                      >
-                        Cosmic Reflection
-                      </span>
-                    </div>
-
-                    <h2
-                      class="mt-2 font-serif text-xl leading-tight text-white sm:text-2xl"
-                    >
-                      The sky is always moving.
-                    </h2>
-
-                    <p class="mt-1.5 text-[10px] leading-5 text-white/30">
-                      A glimpse at the energies surrounding us now.
-                    </p>
-                  </div>
-
-                  <motion.div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-200/15 bg-amber-100/[0.035]"
-                    :animate="
-                      prefersReducedMotion
-                        ? {}
-                        : {
-                            rotate: [0, 180, 360],
-                          }
-                    "
-                    :transition="
-                      prefersReducedMotion
-                        ? {}
-                        : {
-                            duration: 20,
-                            repeat: Infinity,
-                            ease: linear,
-                          }
-                    "
-                  >
-                    <Orbit class="h-4 w-4 text-amber-200/65" />
-                  </motion.div>
-                </div>
-
-                <div class="my-4 h-px bg-white/[0.08]" />
-
-                <div class="space-y-2">
-                  <motion.div
-                    v-for="(planet, index) in planetaryUpdates"
-                    :key="planet.planet"
-                    class="group flex items-center justify-between rounded-xl border border-white/[0.05] bg-black/10 px-3 py-2.5"
-                    :initial="{
-                      opacity: 0,
-                      x: 16,
-                    }"
-                    :animate="{
-                      opacity: 1,
-                      x: 0,
-                    }"
-                    :transition="{
-                      duration: 0.6,
-                      delay: 0.75 + index * 0.12,
-                      ease: easeOut,
-                    }"
-                    :whileHover="
-                      prefersReducedMotion
-                        ? {}
-                        : {
-                            x: 4,
-                            borderColor: 'rgba(253,230,138,0.12)',
-                            backgroundColor: 'rgba(255,255,255,0.025)',
-                          }
-                    "
-                  >
-                    <div class="flex min-w-0 items-center gap-2.5">
-                      <motion.div
-                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100/[0.045]"
-                        :animate="
-                          prefersReducedMotion
-                            ? {}
-                            : {
-                                y: [0, -2, 0, 2, 0],
-                                rotate: [0, 4, 0, -4, 0],
-                              }
-                        "
-                        :transition="
-                          prefersReducedMotion
-                            ? {}
-                            : {
-                                duration: 5 + index,
-                                repeat: Infinity,
-                                delay: index * 0.5,
-                                ease: easeInOut,
-                              }
-                        "
-                      >
-                        <component
-                          :is="planet.icon"
-                          class="h-3 w-3 text-amber-200/70"
-                        />
-                      </motion.div>
-
-                      <div class="min-w-0">
-                        <p class="text-[11px] text-white/75">
-                          {{ planet.planet }}
-                        </p>
-
-                        <p
-                          class="mt-0.5 truncate text-[8px] text-white/25"
-                        >
-                          {{ planet.influence }}
-                        </p>
-                      </div>
-                    </div>
-
-                    <motion.span
-                      class="ml-2 shrink-0 text-[8px] text-amber-100/50"
-                      :animate="
-                        prefersReducedMotion
-                          ? {}
-                          : {
-                              opacity: [0.35, 0.7, 0.35],
-                            }
-                      "
-                      :transition="
-                        prefersReducedMotion
-                          ? {}
-                          : {
-                              duration: 3.5 + index,
-                              repeat: Infinity,
-                              delay: index * 0.7,
-                              ease: easeInOut,
-                            }
-                      "
-                    >
-                      {{ planet.position }}
-                    </motion.span>
-                  </motion.div>
-                </div>
-
-                <motion.div
-                  class="mt-3 rounded-xl border border-amber-200/10 bg-amber-100/[0.025] px-3.5 py-3"
-                  :whileHover="
-                    prefersReducedMotion
-                      ? {}
-                      : {
-                          borderColor: 'rgba(253,230,138,0.18)',
-                          backgroundColor: 'rgba(253,230,138,0.04)',
-                        }
-                  "
-                  :transition="{
-                    duration: 0.4,
-                  }"
-                >
-                  <div class="flex items-center gap-2.5">
-                    <motion.div
-                      :animate="
-                        prefersReducedMotion
-                          ? {}
-                          : {
-                              rotate: [0, 8, 0, -8, 0],
-                            }
-                      "
-                      :transition="
-                        prefersReducedMotion
-                          ? {}
-                          : {
-                              duration: 7,
-                              repeat: Infinity,
-                              ease: easeInOut,
-                            }
-                      "
-                    >
-                      <Compass
-                        class="h-3.5 w-3.5 shrink-0 text-amber-200/55"
-                      />
-                    </motion.div>
-
-                    <div>
-                      <p
-                        class="text-[7px] uppercase tracking-[0.25em] text-amber-100/30"
-                      >
-                        The invitation
-                      </p>
-
-                      <p class="mt-0.5 font-serif text-xs text-white/65">
-                        Notice what is asking for your attention.
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <div class="mt-3 flex items-center justify-between">
-                  <span class="text-[8px] text-white/20">
-                    Read the sky. Reflect within.
-                  </span>
-
-                  <motion.span
-                    class="text-[8px] uppercase tracking-[0.2em] text-white/15"
-                    :animate="
-                      prefersReducedMotion
-                        ? {}
-                        : {
-                            opacity: [0.4, 0.7, 0.4],
-                          }
-                    "
-                    :transition="
-                      prefersReducedMotion
-                        ? {}
-                        : {
-                            duration: 5,
-                            repeat: Infinity,
-                            ease: easeInOut,
-                          }
-                    "
-                  >
-                    Sammy
-                  </motion.span>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
+      <div
+        class="mr-3 mt-2 text-right text-[6px] uppercase tracking-[0.25em] text-[#858EBA]/35"
+      >
+        Expression
       </div>
     </div>
 
     <div
-      class="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#080611] to-transparent"
-    />
-
-    <motion.a
-      href="#about"
-      class="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-1.5 text-white/20 transition-colors hover:text-white/50 md:flex"
-      :animate="
-        prefersReducedMotion
-          ? {}
-          : {
-              y: [0, 4, 0],
-              opacity: [0.2, 0.55, 0.2],
-            }
-      "
-      :transition="
-        prefersReducedMotion
-          ? {}
-          : {
-              duration: 3.5,
-              repeat: Infinity,
-              ease: easeInOut,
-            }
-      "
+      class="absolute bottom-[28%] right-[12%] z-40 hidden lg:block"
     >
-      <span class="text-[7px] uppercase tracking-[0.35em]">
-        Explore
+      <div class="flex items-center gap-4">
+        <div
+          class="flex h-7 w-7 items-center justify-center rounded-full border border-[#858EBA]/25 bg-[#080D1C]"
+        >
+          <Sparkles
+            class="h-3 w-3 text-[#858EBA]"
+            :stroke-width="1"
+          />
+        </div>
+
+        <div>
+          <div
+            class="text-[7px] uppercase tracking-[0.3em] text-[#858EBA]/55"
+          >
+            Venus
+          </div>
+
+          <div
+            class="mt-1 font-mono text-[10px] text-[#E8E7E1]/65"
+          >
+            08° Cancer
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="ml-3 mt-3 h-10 w-px bg-[#858EBA]/15"
+      />
+
+      <div
+        class="ml-3 mt-2 text-[6px] uppercase tracking-[0.25em] text-[#858EBA]/35"
+      >
+        Connection
+      </div>
+    </div>
+
+    <!-- =========================================================
+         INTRO COPY
+    ========================================================== -->
+
+    <div
+      class="absolute bottom-[13%] left-5 z-40 max-w-[230px] sm:left-[10%] lg:bottom-[15%]"
+    >
+      <div
+        class="mb-4 text-[7px] uppercase tracking-[0.4em] text-[#858EBA]/40"
+      >
+        A different way of seeing
+      </div>
+
+      <p
+        class="text-[11px] font-light leading-5 text-[#E8E7E1]/45"
+      >
+        Explore the deeper patterns behind your relationships,
+        purpose and the experiences shaping your life.
+      </p>
+    </div>
+
+    <!-- =========================================================
+         SKY INDEX
+    ========================================================== -->
+
+    <div
+      class="absolute bottom-[15%] right-[8%] z-40 hidden w-[210px] lg:block"
+    >
+      <div
+        class="mb-4 flex items-center justify-between border-b border-[#858EBA]/10 pb-3"
+      >
+        <span
+          class="text-[7px] uppercase tracking-[0.35em] text-[#858EBA]/45"
+        >
+          Current sky
+        </span>
+
+        <span
+          class="font-mono text-[6px] tracking-[0.2em] text-[#858EBA]/25"
+        >
+          03 / 03
+        </span>
+      </div>
+
+      <div
+        v-for="planet in planets"
+        :key="planet.name"
+        class="flex items-center justify-between border-b border-[#858EBA]/[0.06] py-2.5"
+      >
+        <div class="flex items-center gap-3">
+          <component
+            :is="planet.icon"
+            class="h-3 w-3 text-[#858EBA]/55"
+            :stroke-width="1"
+          />
+
+          <span
+            class="text-[7px] uppercase tracking-[0.24em] text-[#E8E7E1]/45"
+          >
+            {{ planet.name }}
+          </span>
+        </div>
+
+        <span
+          class="font-mono text-[8px] text-[#858EBA]/65"
+        >
+          {{ planet.degree }} {{ planet.sign }}
+        </span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         BOTTOM INDEX
+    ========================================================== -->
+
+    <div
+      class="absolute bottom-8 left-5 z-50 hidden items-center gap-4 sm:left-[10%] sm:flex"
+    >
+      <span
+        class="font-mono text-[7px] tracking-[0.3em] text-[#858EBA]/35"
+      >
+        01
       </span>
 
-      <ChevronDown class="h-3.5 w-3.5" />
-    </motion.a>
-  </section>
+      <span
+        class="h-px w-8 bg-[#858EBA]/20"
+      />
 
-  <BookAReadingDialog
-    v-model:open="bookingOpen"
-    @select="handleReadingSelection"
-  />
+      <span
+        class="text-[7px] uppercase tracking-[0.38em] text-[#858EBA]/30"
+      >
+        Astral portrait
+      </span>
+    </div>
+
+    <!-- =========================================================
+         CTA
+    ========================================================== -->
+
+    <button
+      type="button"
+      class="group absolute bottom-7 right-5 z-50 flex items-center gap-5 sm:right-[8%]"
+      @click="openBooking"
+    >
+      <span
+        class="text-[8px] uppercase tracking-[0.38em] text-[#E8E7E1]/60 transition-colors duration-500 group-hover:text-[#E8E7E1]"
+      >
+        Begin a reading
+      </span>
+
+      <span
+        class="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#858EBA]/25 transition-all duration-500 group-hover:border-[#858EBA]/70 group-hover:bg-[#182653]/30"
+      >
+        <ArrowUpRight
+          class="h-4 w-4 text-[#858EBA] transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+          :stroke-width="1"
+        />
+
+        <span
+          class="absolute inset-[-5px] rounded-full border border-[#858EBA]/[0.06] transition-transform duration-700 group-hover:scale-110"
+        />
+      </span>
+    </button>
+
+    <!-- =========================================================
+         MOBILE PLANET STRIP
+    ========================================================== -->
+
+    <div
+      class="absolute bottom-[14%] left-5 right-5 z-40 grid grid-cols-3 border-y border-[#858EBA]/10 py-3 lg:hidden"
+    >
+      <div
+        v-for="(planet, index) in planets"
+        :key="planet.name"
+        class="flex items-center gap-2"
+        :class="{
+          'justify-center border-x border-[#858EBA]/10':
+            index === 1,
+          'justify-end': index === 2,
+        }"
+      >
+        <component
+          :is="planet.icon"
+          class="h-3 w-3 text-[#858EBA]/55"
+          :stroke-width="1"
+        />
+
+        <div>
+          <div
+            class="text-[6px] uppercase tracking-[0.2em] text-[#858EBA]/35"
+          >
+            {{ planet.name }}
+          </div>
+
+          <div
+            class="mt-1 font-mono text-[7px] text-[#E8E7E1]/50"
+          >
+            {{ planet.degree }} {{ planet.sign }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         BOOKING
+    ========================================================== -->
+
+    <BookAReadingDialog
+      v-model:open="bookingOpen"
+      @select-reading="handleReadingSelection"
+    />
+  </section>
 </template>
+
+<style scoped>
+.font-serif {
+  font-family:
+    "Cormorant Garamond",
+    "Times New Roman",
+    serif;
+}
+
+.astral-stage {
+  isolation: isolate;
+}
+
+@keyframes celestialSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>

@@ -10,7 +10,6 @@ import {
   ArrowRight,
   ChevronRight,
   Menu,
-  Sparkles,
   X,
 } from "lucide-vue-next";
 
@@ -258,11 +257,6 @@ onUnmounted(() => {
             <span
               class="absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-white/25 transition-all duration-700 group-hover:left-[130%]"
             />
-
-            <Sparkles
-              class="relative mr-2 h-3.5 w-3.5 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110"
-            />
-
             <span class="relative">
               Book a Reading
             </span>
@@ -394,10 +388,6 @@ onUnmounted(() => {
                   class="absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-white/30 transition-all duration-700 group-hover:left-[130%]"
                 />
 
-                <Sparkles
-                  class="relative mr-2 h-4 w-4 transition-transform duration-500 group-hover:rotate-12"
-                />
-
                 <span class="relative">
                   Book a Private Reading
                 </span>
@@ -406,8 +396,6 @@ onUnmounted(() => {
                   class="relative ml-auto h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
                 />
               </Button>
-
-              <!-- Supporting text -->
 
               <div
                 class="flex items-center justify-center gap-2 py-3"
@@ -433,14 +421,6 @@ onUnmounted(() => {
     </div>
   </header>
 
-  <!-- =========================================================
-       MOBILE BACKDROP
-       
-       IMPORTANT:
-       This sits OUTSIDE the header so the header remains sharp.
-       The backdrop-filter blurs everything underneath it.
-  ========================================================== -->
-
   <Transition name="backdrop">
     <div
       v-if="mobileMenuOpen"
@@ -458,17 +438,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* ============================================================
-   Smooth scrolling
-============================================================ */
-
 :global(html) {
   scroll-behavior: smooth;
 }
-
-/* ============================================================
-   Mobile backdrop
-============================================================ */
 
 .backdrop-enter-active,
 .backdrop-leave-active {
@@ -482,10 +454,6 @@ onUnmounted(() => {
   opacity: 0;
   backdrop-filter: blur(0);
 }
-
-/* ============================================================
-   Mobile menu
-============================================================ */
 
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {
@@ -506,10 +474,6 @@ onUnmounted(() => {
   transform: translateY(-10px);
 }
 
-/* ============================================================
-   Menu icon
-============================================================ */
-
 .icon-switch-enter-active,
 .icon-switch-leave-active {
   transition:
@@ -527,19 +491,11 @@ onUnmounted(() => {
   transform: rotate(45deg) scale(0.7);
 }
 
-/* ============================================================
-   Accessibility
-============================================================ */
-
 a:focus-visible,
 button:focus-visible {
   outline: 2px solid rgba(253, 230, 138, 0.5);
   outline-offset: 3px;
 }
-
-/* ============================================================
-   Reduced motion
-============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   :global(html) {

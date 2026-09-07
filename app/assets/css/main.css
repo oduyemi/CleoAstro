@@ -1,261 +1,480 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
-
-/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"); */
-
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  --color-cosmic: #120b2e;
-  --color-gold: #d99a0b;
-  --color-cream: #faf7f0;
-
-  --radius: 0.625rem;
-
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-
-  --destructive: oklch(0.577 0.245 27.325);
-
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-}
-
-/* =========================================================
-   TAILWIND THEME
-   ========================================================= */
-
-@theme inline {
-  /* Fonts */
-  --font-sans: "Inter", sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-heading: var(--font-serif);
-
-  /* Radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-
-  /* Shadcn colors */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-
-  --color-destructive: var(--destructive);
-
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
-  /* Charts */
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-
-  /* Sidebar */
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-
-  /* Custom gold palette */
-  --color-gold-50: #fffaf0;
-  --color-gold-400: #e8b83b;
-  --color-gold-500: #d99a0b;
-  --color-gold-600: #b77f08;
-
-  /* Brand colors */
-  --color-cosmic: #120b2e;
-  --color-gold: #d99a0b;
-  --color-cream: #faf7f0;
-}
-
-/* =========================================================
-   DARK MODE
-   ========================================================= */
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-
-  --destructive: oklch(0.704 0.191 22.216);
-
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
-/* =========================================================
-   BASE
-   ========================================================= */
-
-html {
-  scroll-behavior: smooth;
-}
-
-* {
-  @apply border-border outline-ring/50;
-}
-
-body {
-  margin: 0;
-  background: var(--color-cream);
-  color: #18131f;
-  font-family: "Inter", sans-serif;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: "Playfair Display", Georgia, serif;
-}
-
-button,
-input,
-textarea,
-select {
-  font-family: inherit;
-}
-
-::selection {
-  background: rgba(217, 154, 11, 0.25);
-}
-
-/* =========================================================
-   COMPONENTS
-   ========================================================= */
-
-@layer components {
-  .container-page {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+   
+  html {
+    scroll-behavior: smooth;
+    background: #050814;
   }
-
-  .section-padding {
-    @apply py-16 sm:py-20 lg:py-24;
-  }
-
-  .heading-display {
-    @apply font-serif text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl;
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-gold-500 px-6 py-3 font-semibold text-white transition hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2;
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-gold-500 px-6 py-3 font-semibold text-gold-600 transition hover:bg-gold-50 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2;
-  }
-}
-
-.blu {
-  color:#120b2e
-}
-
-.whi{
-  color: #fff !important;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+  
   body {
-    @apply bg-background text-foreground;
+    margin: 0;
+    min-height: 100vh;
+    background: #050814;
+    color: #e8e7e1;
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden;
+  }
+   
+   /* =========================================================
+      GLOBAL CELESTIAL CANVAS
+      ========================================================= */
+   
+  #__nuxt {
+    --celestial-text: #e8e7e1;
+    --celestial-muted: #858eba;
+    --celestial-line: rgba(133, 142, 186, 0.16);
+  
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
+    overflow: clip;
+  
+    background:
+      radial-gradient(
+        ellipse 90% 60% at 50% 10%,
+        rgba(27, 40, 84, 0.32),
+        transparent 68%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 15% 55%,
+        rgba(20, 31, 67, 0.18),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 85% 75%,
+        rgba(52, 68, 122, 0.12),
+        transparent 70%
+      ),
+      linear-gradient(
+        180deg,
+        #050814 0%,
+        #080d1c 38%,
+        #0a1125 68%,
+        #050814 100%
+      );
+  }
+  
+  /* =========================================================
+    CENTRAL CELESTIAL IMAGE
+    ========================================================= */
+  
+  #__nuxt::before {
+    content: "";
+  
+    position: fixed;
+    z-index: 0;
+  
+    top: 50%;
+    left: 50%;
+  
+    width: min(560px, 68vw);
+    height: min(640px, 76vh);
+  
+    transform: translate(-50%, -50%);
+  
+    background-image: url("/images/bg_img.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  
+    filter:
+      drop-shadow(0 0 45px rgba(52, 68, 122, 0.18))
+      drop-shadow(0 30px 90px rgba(0, 0, 0, 0.3));
+  
+    pointer-events: none;
+  }
+  
+  /* =========================================================
+    SUBTLE ATMOSPHERIC DUST
+    ========================================================= */
+  
+  #__nuxt::after {
+    content: "";
+  
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  
+    pointer-events: none;
+  
+    opacity: 0.4;
+  
+    background-image:
+      radial-gradient(
+        circle at 8% 14%,
+        rgba(180, 191, 230, 0.28) 0 0.8px,
+        transparent 1.4px
+      ),
+      radial-gradient(
+        circle at 17% 73%,
+        rgba(180, 191, 230, 0.18) 0 0.6px,
+        transparent 1.2px
+      ),
+      radial-gradient(
+        circle at 31% 27%,
+        rgba(180, 191, 230, 0.22) 0 0.7px,
+        transparent 1.3px
+      ),
+      radial-gradient(
+        circle at 44% 84%,
+        rgba(180, 191, 230, 0.15) 0 0.6px,
+        transparent 1.2px
+      ),
+      radial-gradient(
+        circle at 58% 18%,
+        rgba(180, 191, 230, 0.2) 0 0.7px,
+        transparent 1.3px
+      ),
+      radial-gradient(
+        circle at 69% 62%,
+        rgba(180, 191, 230, 0.18) 0 0.6px,
+        transparent 1.2px
+      ),
+      radial-gradient(
+        circle at 81% 31%,
+        rgba(180, 191, 230, 0.24) 0 0.8px,
+        transparent 1.4px
+      ),
+      radial-gradient(
+        circle at 93% 78%,
+        rgba(180, 191, 230, 0.16) 0 0.6px,
+        transparent 1.2px
+      );
+  }
+  
+  /* =========================================================
+    CONTENT ABOVE GLOBAL BACKGROUND
+    ========================================================= */
+  
+  #__nuxt > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Keep layout wrappers transparent */
+  #__nuxt main,
+  #__nuxt footer {
+    background: transparent;
+  }
+  
+  /* =========================================================
+    RESPONSIVE
+    ========================================================= */
+  
+  @media (max-width: 768px) {
+    #__nuxt::before {
+      width: min(430px, 88vw);
+      height: min(500px, 70vh);
+      opacity: 0.72;
+    }
+  
+    #__nuxt::after {
+      opacity: 0.35;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #__nuxt::before {
+      width: 92vw;
+      height: 430px;
+      top: 38%;
+    }
+  }
+  
+  /* =========================================================
+    REDUCED MOTION
+    ========================================================= */
+  
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+/* =========================================================
+   APPLICATION CANVAS
+   ========================================================= */
+
+#__nuxt {
+  --celestial-text: #e8e7e1;
+  --celestial-soft: #c8cbe0;
+  --celestial-muted: #858eba;
+
+  --celestial-midnight: #050814;
+  --celestial-deep: #080d1c;
+  --celestial-navy: #101a35;
+  --celestial-indigo: #182653;
+  --celestial-blue: #34447a;
+
+  --celestial-line: rgba(133, 142, 186, 0.14);
+
+  position: relative;
+  min-height: 100vh;
+  isolation: isolate;
+
+  overflow: clip;
+
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 50% 0%,
+      rgba(27, 40, 84, 0.34),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 0% 40%,
+      rgba(20, 31, 67, 0.18),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 100% 65%,
+      rgba(52, 68, 122, 0.12),
+      transparent 72%
+    ),
+    linear-gradient(
+      180deg,
+      #050814 0%,
+      #080d1c 32%,
+      #0a1125 62%,
+      #080d1c 82%,
+      #050814 100%
+    );
+}
+
+/* =========================================================
+   CENTRAL ARTWORK
+   ========================================================= */
+
+#__nuxt::before {
+  content: "";
+
+  position: fixed;
+  z-index: -2;
+
+  top: 50%;
+  left: 50%;
+
+  width: min(620px, 62vw);
+  height: min(700px, 78vh);
+
+  transform: translate(-50%, -50%);
+
+  background-image: url("/images/bg_img.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+
+  /*
+   * The artwork itself remains completely untouched.
+   * Only its surrounding presence is softened.
+   */
+  filter:
+    drop-shadow(
+      0 0 55px rgba(52, 68, 122, 0.16)
+    )
+    drop-shadow(
+      0 35px 100px rgba(0, 0, 0, 0.28)
+    );
+
+  opacity: 0.9;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   CELESTIAL HALO
+   ========================================================= */
+
+#__nuxt::after {
+  content: "";
+
+  position: fixed;
+  z-index: -1;
+
+  top: 50%;
+  left: 50%;
+
+  width: min(900px, 90vw);
+  height: min(900px, 90vw);
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(52, 68, 122, 0.075) 0%,
+      rgba(27, 40, 84, 0.045) 32%,
+      transparent 68%
+    );
+
+  box-shadow:
+    inset 0 0 100px rgba(133, 142, 186, 0.025),
+    0 0 160px rgba(52, 68, 122, 0.035);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   ATMOSPHERIC DUST
+   ========================================================= */
+
+.celestial-dust {
+  position: fixed;
+  inset: 0;
+
+  z-index: -1;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.celestial-dust::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(133, 142, 186, 0.035),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 80% 65%,
+      rgba(52, 68, 122, 0.04),
+      transparent 24%
+    );
+}
+
+/* Individual dust particles */
+
+.celestial-dust-particle {
+  position: absolute;
+
+  display: block;
+
+  border-radius: 999px;
+
+  background: rgba(180, 191, 230, 0.72);
+
+  box-shadow:
+    0 0 2px rgba(180, 191, 230, 0.22),
+    0 0 7px rgba(115, 132, 190, 0.08);
+
+  animation:
+    celestialDustFloat
+    var(--dust-duration)
+    ease-in-out
+    var(--dust-delay)
+    infinite alternate;
+}
+
+@keyframes celestialDustFloat {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  45% {
+    opacity: 0.45;
+  }
+
+  100% {
+    transform:
+      translate3d(
+        var(--dust-x),
+        var(--dust-y),
+        0
+      );
+
+    opacity: 0.12;
+  }
+}
+
+/* =========================================================
+   VERY SUBTLE ASTRONOMICAL GRAIN
+   ========================================================= */
+
+.celestial-grain {
+  position: fixed;
+  inset: 0;
+
+  z-index: -1;
+
+  pointer-events: none;
+
+  opacity: 0.018;
+
+  background-image:
+    radial-gradient(
+      rgba(232, 231, 225, 0.8) 0.45px,
+      transparent 0.45px
+    );
+
+  background-size: 5px 5px;
+}
+
+/* =========================================================
+   CONTENT LAYER
+   ========================================================= */
+
+#__nuxt main,
+#__nuxt header,
+#__nuxt footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .celestial-dust-particle {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+  #__nuxt::before {
+    width: min(500px, 82vw);
+    height: min(600px, 72vh);
+
+    opacity: 0.72;
+  }
+
+  #__nuxt::after {
+    width: 760px;
+    height: 760px;
+
+    opacity: 0.7;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+  #__nuxt::before {
+    width: 96vw;
+    height: 500px;
+
+    top: 42%;
+
+    opacity: 0.52;
+  }
+
+  #__nuxt::after {
+    width: 600px;
+    height: 600px;
+
+    opacity: 0.55;
   }
 }

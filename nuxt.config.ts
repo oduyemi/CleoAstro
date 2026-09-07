@@ -1,4 +1,4 @@
-import tailwindcss from "@tailwindcss/vite"
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
   compatibilityDate: "2026-08-14",
@@ -19,19 +19,42 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    mongodbUri: "",
-    jwtSecret: "",
+    // -----------------------------------------------------------------------
+    // Private server-side configuration
+    // NEVER expose these inside `public`
+    // -----------------------------------------------------------------------
 
-    paystackSecretKey: "",
+    mongodbUri: process.env.MONGODB_URI || "",
+    jwtSecret: process.env.JWT_SECRET || "",
 
-    cloudinaryCloudName: "",
-    cloudinaryApiKey: "",
-    cloudinaryApiSecret: "",
+    freeAstroApiKey: process.env.FREE_ASTRO_API_KEY || "",
+
+    paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || "",
+
+    // cloudinaryCloudName:
+    //   process.env.CLOUDINARY_CLOUD_NAME || "",
+
+    // cloudinaryApiKey:
+    //   process.env.CLOUDINARY_API_KEY || "",
+
+    // cloudinaryApiSecret:
+    //   process.env.CLOUDINARY_API_SECRET || "",
+
+    // -----------------------------------------------------------------------
+    // Client-accessible configuration
+    // -----------------------------------------------------------------------
 
     public: {
-      appName: "Cleo Astro",
-      appUrl: "http://localhost:3000",
-      paystackPublicKey: "",
+      appName:
+        process.env.NUXT_PUBLIC_APP_NAME ||
+        "Cleo Astro",
+
+      appUrl:
+        process.env.NUXT_PUBLIC_APP_URL ||
+        "http://localhost:3000",
+
+      paystackPublicKey:
+        process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
     },
   },
 
@@ -48,7 +71,7 @@ export default defineNuxtConfig({
         },
         {
           name: "theme-color",
-          content: "#120B2E",
+          content: "#050814",
         },
       ],
 
@@ -86,4 +109,4 @@ export default defineNuxtConfig({
       cors: true,
     },
   },
-})
+});

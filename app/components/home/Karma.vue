@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
   >
     <!-- Atmospheric glow -->
     <div
-      class="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/[0.05] blur-[100px]"
+      class="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent blur-[100px]"
     />
 
     <div class="relative mx-auto max-w-7xl px-6 lg:px-8">

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Hero from "@/components/home/Hero.vue";
 import About from "@/components/home/About.vue";
-import Readings from "@/components/home/Readings.vue";
+import Readings from "@/components/home/PersonalDailyHoroscope.vue";
+import PersonalDailyHoroscope from "@/components/home/Readings.vue";
 import Karma from "@/components/home/Karma.vue";
 import Planets from "@/components/home/Planets.vue";
 </script>
@@ -11,6 +12,7 @@ import Planets from "@/components/home/Planets.vue";
     <Hero />
     <About />
     <Readings />
+    <PersonalDailyHoroscope />
     <Karma />
     <Planets />
   </main>

@@ -41,7 +41,7 @@ const planetaryUpdates = [
 <template>
   <section
     id="planets"
-    class="border-y border-white/[0.06] bg-white/[0.015] py-28"
+    class="border-y border-white/[0.06] bg-transparent py-28"
   >
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <!-- Section header -->

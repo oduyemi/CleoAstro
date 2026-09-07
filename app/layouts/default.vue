@@ -2,9 +2,8 @@
 import Header from "@/components/common/Header.vue";
 </script>
 
-
 <template>
-  <div class="min-h-screen bg-spiritual-cream">
+  <div class="min-h-screen">
     <header>
       <Header />
     </header>
