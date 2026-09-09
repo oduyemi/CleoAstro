@@ -387,15 +387,6 @@ onBeforeUnmount(() => {
             :class="{ 'hero-visible': isReady }"
           >
             <div class="flex items-start gap-4">
-              <div
-                class="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#C58B92]/15"
-              >
-                <Sparkles
-                  class="h-3 w-3 text-[#C8A77A]/60"
-                  stroke-width="1"
-                />
-              </div>
-
               <p
                 class="text-[10px] leading-5 text-[#C58B92]/48 sm:text-[11px]"
               >
