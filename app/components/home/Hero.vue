@@ -462,7 +462,7 @@ onBeforeUnmount(() => {
               />
 
               <img
-                src="/images/sammy.png"
+                src="/images/sammy.PNG"
                 alt="Sammy — Vedic astrologer and intuitive reader"
                 class="portrait-image absolute inset-0 h-full w-full object-contain object-bottom"
                 draggable="false"
