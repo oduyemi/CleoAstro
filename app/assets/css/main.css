@@ -1,255 +1,98 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-   
-  html {
-    scroll-behavior: smooth;
-    background: #050814;
-  }
-  
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: #050814;
-    color: #e8e7e1;
-    font-family: "Inter", sans-serif;
-    overflow-x: hidden;
-  }
-   
-   /* =========================================================
-      GLOBAL CELESTIAL CANVAS
-      ========================================================= */
-   
-  #__nuxt {
-    --celestial-text: #e8e7e1;
-    --celestial-muted: #858eba;
-    --celestial-line: rgba(133, 142, 186, 0.16);
-  
-    position: relative;
-    min-height: 100vh;
-    isolation: isolate;
-    overflow: clip;
-  
-    background:
-      radial-gradient(
-        ellipse 90% 60% at 50% 10%,
-        rgba(27, 40, 84, 0.32),
-        transparent 68%
-      ),
-      radial-gradient(
-        ellipse 70% 50% at 15% 55%,
-        rgba(20, 31, 67, 0.18),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 70% 50% at 85% 75%,
-        rgba(52, 68, 122, 0.12),
-        transparent 70%
-      ),
-      linear-gradient(
-        180deg,
-        #050814 0%,
-        #080d1c 38%,
-        #0a1125 68%,
-        #050814 100%
-      );
-  }
-  
-  /* =========================================================
-    CENTRAL CELESTIAL IMAGE
-    ========================================================= */
-  
-  #__nuxt::before {
-    content: "";
-  
-    position: fixed;
-    z-index: 0;
-  
-    top: 50%;
-    left: 50%;
-  
-    width: min(560px, 68vw);
-    height: min(640px, 76vh);
-  
-    transform: translate(-50%, -50%);
-  
-    background-image: url("/images/bg_img.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-  
-    filter:
-      drop-shadow(0 0 45px rgba(52, 68, 122, 0.18))
-      drop-shadow(0 30px 90px rgba(0, 0, 0, 0.3));
-  
-    pointer-events: none;
-  }
-  
-  /* =========================================================
-    SUBTLE ATMOSPHERIC DUST
-    ========================================================= */
-  
-  #__nuxt::after {
-    content: "";
-  
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-  
-    pointer-events: none;
-  
-    opacity: 0.4;
-  
-    background-image:
-      radial-gradient(
-        circle at 8% 14%,
-        rgba(180, 191, 230, 0.28) 0 0.8px,
-        transparent 1.4px
-      ),
-      radial-gradient(
-        circle at 17% 73%,
-        rgba(180, 191, 230, 0.18) 0 0.6px,
-        transparent 1.2px
-      ),
-      radial-gradient(
-        circle at 31% 27%,
-        rgba(180, 191, 230, 0.22) 0 0.7px,
-        transparent 1.3px
-      ),
-      radial-gradient(
-        circle at 44% 84%,
-        rgba(180, 191, 230, 0.15) 0 0.6px,
-        transparent 1.2px
-      ),
-      radial-gradient(
-        circle at 58% 18%,
-        rgba(180, 191, 230, 0.2) 0 0.7px,
-        transparent 1.3px
-      ),
-      radial-gradient(
-        circle at 69% 62%,
-        rgba(180, 191, 230, 0.18) 0 0.6px,
-        transparent 1.2px
-      ),
-      radial-gradient(
-        circle at 81% 31%,
-        rgba(180, 191, 230, 0.24) 0 0.8px,
-        transparent 1.4px
-      ),
-      radial-gradient(
-        circle at 93% 78%,
-        rgba(180, 191, 230, 0.16) 0 0.6px,
-        transparent 1.2px
-      );
-  }
-  
-  /* =========================================================
-    CONTENT ABOVE GLOBAL BACKGROUND
-    ========================================================= */
-  
-  #__nuxt > * {
-    position: relative;
-    z-index: 1;
-  }
-  
-  /* Keep layout wrappers transparent */
-  #__nuxt main,
-  #__nuxt footer {
-    background: transparent;
-  }
-  
-  /* =========================================================
-    RESPONSIVE
-    ========================================================= */
-  
-  @media (max-width: 768px) {
-    #__nuxt::before {
-      width: min(430px, 88vw);
-      height: min(500px, 70vh);
-      opacity: 0.72;
-    }
-  
-    #__nuxt::after {
-      opacity: 0.35;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    #__nuxt::before {
-      width: 92vw;
-      height: 430px;
-      top: 38%;
-    }
-  }
-  
-  /* =========================================================
-    REDUCED MOTION
-    ========================================================= */
-  
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
-/* =========================================================
-   APPLICATION CANVAS
-   ========================================================= */
+
+
+:root {
+  --astro-bg: #160b10;
+  --astro-deep: #1d0c13;
+  --astro-surface: #261018;
+
+  --astro-burgundy: #42141f;
+  --astro-red: #6b0f1a;
+  --astro-red-soft: #7e3541;
+
+  --astro-rose: #a45a65;
+  --astro-muted: #c58b92;
+
+  --astro-ivory: #f1e8e3;
+  --astro-gold: #c8a77a;
+
+  --astro-line: rgba(197, 139, 146, 0.14);
+  --astro-line-soft: rgba(197, 139, 146, 0.08);
+
+  --astro-glow: rgba(107, 15, 26, 0.24);
+  --astro-glow-soft: rgba(126, 53, 65, 0.14);
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--astro-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+
+  background: var(--astro-bg);
+
+  color: var(--astro-ivory);
+
+  font-family: "Inter", sans-serif;
+
+  overflow-x: hidden;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 #__nuxt {
-  --celestial-text: #e8e7e1;
-  --celestial-soft: #c8cbe0;
-  --celestial-muted: #858eba;
-
-  --celestial-midnight: #050814;
-  --celestial-deep: #080d1c;
-  --celestial-navy: #101a35;
-  --celestial-indigo: #182653;
-  --celestial-blue: #34447a;
-
-  --celestial-line: rgba(133, 142, 186, 0.14);
-
   position: relative;
+
   min-height: 100vh;
+
   isolation: isolate;
 
   overflow: clip;
 
+  color: var(--astro-ivory);
+
   background:
     radial-gradient(
-      ellipse 90% 55% at 50% 0%,
-      rgba(27, 40, 84, 0.34),
-      transparent 68%
-    ),
-    radial-gradient(
-      ellipse 70% 50% at 0% 40%,
-      rgba(20, 31, 67, 0.18),
+      ellipse 75% 55% at 50% 0%,
+      rgba(107, 15, 26, 0.28),
       transparent 70%
     ),
     radial-gradient(
-      ellipse 70% 55% at 100% 65%,
-      rgba(52, 68, 122, 0.12),
+      ellipse 55% 45% at 0% 45%,
+      rgba(66, 20, 31, 0.32),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 60% 50% at 100% 70%,
+      rgba(126, 53, 65, 0.16),
       transparent 72%
     ),
     linear-gradient(
       180deg,
-      #050814 0%,
-      #080d1c 32%,
-      #0a1125 62%,
-      #080d1c 82%,
-      #050814 100%
+      #160b10 0%,
+      #1d0c13 35%,
+      #261018 65%,
+      #160b10 100%
     );
 }
 
 /* =========================================================
-   CENTRAL ARTWORK
+   CENTRAL CELESTIAL ARTWORK
+   bg_img.png remains in its original colors.
    ========================================================= */
 
 #__nuxt::before {
   content: "";
 
   position: fixed;
-  z-index: -2;
+
+  z-index: 0;
 
   top: 50%;
   left: 50%;
@@ -260,36 +103,38 @@
   transform: translate(-50%, -50%);
 
   background-image: url("/images/bg_img.png");
+
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
 
   /*
-   * The artwork itself remains completely untouched.
-   * Only its surrounding presence is softened.
+   * No color filter is applied.
+   * The original image colors are preserved.
    */
   filter:
     drop-shadow(
-      0 0 55px rgba(52, 68, 122, 0.16)
+      0 0 55px rgba(107, 15, 26, 0.18)
     )
     drop-shadow(
-      0 35px 100px rgba(0, 0, 0, 0.28)
+      0 35px 100px rgba(10, 2, 5, 0.38)
     );
 
-  opacity: 0.9;
+  opacity: 0.92;
 
   pointer-events: none;
 }
 
 /* =========================================================
-   CELESTIAL HALO
+   CENTRAL ATMOSPHERIC RED GLOW
    ========================================================= */
 
 #__nuxt::after {
   content: "";
 
   position: fixed;
-  z-index: -1;
+
+  z-index: 0;
 
   top: 50%;
   left: 50%;
@@ -304,47 +149,53 @@
   background:
     radial-gradient(
       circle,
-      rgba(52, 68, 122, 0.075) 0%,
-      rgba(27, 40, 84, 0.045) 32%,
-      transparent 68%
+      rgba(107, 15, 26, 0.10) 0%,
+      rgba(107, 15, 26, 0.065) 25%,
+      rgba(66, 20, 31, 0.045) 45%,
+      transparent 70%
     );
 
   box-shadow:
-    inset 0 0 100px rgba(133, 142, 186, 0.025),
-    0 0 160px rgba(52, 68, 122, 0.035);
+    inset 0 0 100px rgba(197, 139, 146, 0.025),
+    0 0 160px rgba(107, 15, 26, 0.045);
 
   pointer-events: none;
 }
 
 /* =========================================================
-   ATMOSPHERIC DUST
+   CELESTIAL DUST
    ========================================================= */
 
 .celestial-dust {
   position: fixed;
+
   inset: 0;
 
-  z-index: -1;
+  z-index: 0;
 
   overflow: hidden;
+
   pointer-events: none;
 }
+
+/* Very subtle atmospheric haze */
 
 .celestial-dust::before {
   content: "";
 
   position: absolute;
+
   inset: 0;
 
   background:
     radial-gradient(
       circle at 20% 30%,
-      rgba(133, 142, 186, 0.035),
+      rgba(197, 139, 146, 0.035),
       transparent 20%
     ),
     radial-gradient(
       circle at 80% 65%,
-      rgba(52, 68, 122, 0.04),
+      rgba(164, 90, 101, 0.045),
       transparent 24%
     );
 }
@@ -356,29 +207,38 @@
 
   display: block;
 
+  width: 2px;
+  height: 2px;
+
   border-radius: 999px;
 
-  background: rgba(180, 191, 230, 0.72);
+  background: rgba(241, 232, 227, 0.58);
 
   box-shadow:
-    0 0 2px rgba(180, 191, 230, 0.22),
-    0 0 7px rgba(115, 132, 190, 0.08);
+    0 0 2px rgba(241, 232, 227, 0.16),
+    0 0 7px rgba(164, 90, 101, 0.08);
 
   animation:
     celestialDustFloat
     var(--dust-duration)
     ease-in-out
     var(--dust-delay)
-    infinite alternate;
+    infinite
+    alternate;
 }
+
+/* =========================================================
+   CELESTIAL DUST MOTION
+   ========================================================= */
 
 @keyframes celestialDustFloat {
   0% {
     transform: translate3d(0, 0, 0);
+    opacity: 0.32;
   }
 
   45% {
-    opacity: 0.45;
+    opacity: 0.42;
   }
 
   100% {
@@ -389,27 +249,28 @@
         0
       );
 
-    opacity: 0.12;
+    opacity: 0.08;
   }
 }
 
 /* =========================================================
-   VERY SUBTLE ASTRONOMICAL GRAIN
+   VERY SUBTLE FILM / GRAIN
    ========================================================= */
 
 .celestial-grain {
   position: fixed;
+
   inset: 0;
 
-  z-index: -1;
+  z-index: 0;
 
   pointer-events: none;
 
-  opacity: 0.018;
+  opacity: 0.016;
 
   background-image:
     radial-gradient(
-      rgba(232, 231, 225, 0.8) 0.45px,
+      rgba(241, 232, 227, 0.75) 0.45px,
       transparent 0.45px
     );
 
@@ -417,33 +278,124 @@
 }
 
 /* =========================================================
-   CONTENT LAYER
+   APPLICATION CONTENT
    ========================================================= */
+
+/*
+ * Keeps all actual application content above the
+ * fixed celestial background layers.
+ */
+
+#__nuxt > * {
+  position: relative;
+
+  z-index: 1;
+}
+
+/* Transparent structural elements */
 
 #__nuxt main,
 #__nuxt header,
 #__nuxt footer {
   position: relative;
+
   z-index: 1;
+
+  background: transparent;
 }
 
 /* =========================================================
-   REDUCED MOTION
+   TYPOGRAPHY HELPERS
    ========================================================= */
 
-@media (prefers-reduced-motion: reduce) {
-  .celestial-dust-particle {
-    animation: none;
-  }
+.font-serif {
+  font-family: "Lora", serif;
+}
+
+.text-astro-ivory {
+  color: var(--astro-ivory);
+}
+
+.text-astro-muted {
+  color: var(--astro-muted);
+}
+
+.text-astro-rose {
+  color: var(--astro-rose);
+}
+
+.text-astro-gold {
+  color: var(--astro-gold);
 }
 
 /* =========================================================
-   TABLET
+   CELESTIAL DIVIDERS
+   ========================================================= */
+
+.astro-divider {
+  width: 100%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--astro-line),
+      transparent
+    );
+}
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+  background: rgba(197, 139, 146, 0.16);
+
+  color: var(--astro-ivory);
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--astro-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 139, 146, 0.24);
+
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 139, 146, 0.38);
+}
+
+/* Firefox */
+
+html {
+  scrollbar-color:
+    rgba(197, 139, 146, 0.24)
+    var(--astro-deep);
+
+  scrollbar-width: thin;
+}
+
+/* =========================================================
+   MOBILE
    ========================================================= */
 
 @media (max-width: 768px) {
   #__nuxt::before {
     width: min(500px, 82vw);
+
     height: min(600px, 72vh);
 
     opacity: 0.72;
@@ -451,19 +403,25 @@
 
   #__nuxt::after {
     width: 760px;
+
     height: 760px;
 
+    opacity: 0.72;
+  }
+
+  .celestial-dust-particle {
     opacity: 0.7;
   }
 }
 
 /* =========================================================
-   MOBILE
+   SMALL MOBILE
    ========================================================= */
 
 @media (max-width: 480px) {
   #__nuxt::before {
     width: 96vw;
+
     height: 500px;
 
     top: 42%;
@@ -473,8 +431,23 @@
 
   #__nuxt::after {
     width: 600px;
+
     height: 600px;
 
     opacity: 0.55;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .celestial-dust-particle {
+    animation: none;
   }
 }

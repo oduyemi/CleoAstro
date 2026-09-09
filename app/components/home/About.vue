@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Sparkles } from "lucide-vue-next";
+import { ArrowRight } from "lucide-vue-next";
 import { motion, useReducedMotion } from "motion-v";
 import { Button } from "@/components/ui/button";
 import BookAReadingDialog from "@/components/booking/BookAReadingDialog.vue";
@@ -91,48 +91,47 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
 <template>
   <section
     id="about"
-    class="bg-transparent relative isolate overflow-hidden border-t border-white/[0.06] py-28 sm:py-32 lg:py-40"
+    class="relative isolate overflow-hidden border-t border-[#C58B92]/[0.06] bg-transparent py-24 sm:py-28 lg:py-32"
   >
     <!-- =====================================================
-      READABILITY FIELD
-      Softly separates the global celestial artwork from
-      the editorial copy without creating a card.
-      ===================================================== -->
+         READABILITY FIELD
+         ===================================================== -->
 
-  <div
-    class="pointer-events-none absolute inset-y-0 right-0 z-[1] w-full lg:w-[62%]"
-    aria-hidden="true"
-  >
-    <!-- Blurred version of the global celestial artwork -->
     <div
-      class="absolute inset-[-12%]"
-      style="
-        background-image: url('/images/bg_img.png');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: min(720px, 85vw) auto;
-        filter: blur(24px);
-        opacity: 0.16;
-        transform: scale(1.08);
-      "
-    />
+      class="pointer-events-none absolute inset-y-0 right-0 z-[1] w-full lg:w-[62%]"
+      aria-hidden="true"
+    >
+      <!-- Softened echo of the global celestial artwork -->
+      <div
+        class="absolute inset-[-12%]"
+        style="
+          background-image: url('/images/bg_img.png');
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: min(720px, 85vw) auto;
+          filter: blur(24px);
+          opacity: 0.13;
+          transform: scale(1.08);
+        "
+      />
 
-    <!-- Dark atmospheric veil -->
-    <div
-      class="absolute inset-0 bg-gradient-to-r
-        from-[#050814]/0
-        via-[#050814]/55
-        to-[#050814]/78"
-    />
+      <!-- Wine atmospheric veil -->
+      <div
+        class="absolute inset-0 bg-gradient-to-r
+          from-[#160B10]/0
+          via-[#160B10]/48
+          to-[#160B10]/76"
+      />
 
-    <!-- Soft central reading field -->
-    <div
-      class="absolute inset-[8%_4%]
-        rounded-[50%]
-        bg-[#050814]/30
-        blur-[70px]"
-    />
-  </div>
+      <!-- Localized reading field -->
+      <div
+        class="absolute inset-[8%_4%]
+          rounded-[50%]
+          bg-[#261018]/28
+          blur-[70px]"
+      />
+    </div>
+
     <!-- =====================================================
          ATMOSPHERE
          ===================================================== -->
@@ -141,16 +140,16 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
       class="pointer-events-none absolute inset-0"
       aria-hidden="true"
     >
-      <!-- Very restrained celestial light -->
+      <!-- Left burgundy atmosphere -->
       <motion.div
-        class="absolute left-[8%] top-[18%] h-[420px] w-[420px] rounded-full bg-[#182653]/20 blur-[150px]"
+        class="absolute left-[8%] top-[18%] h-[420px] w-[420px] rounded-full bg-[#6B0F1A]/[0.12] blur-[150px]"
         :animate="
           prefersReducedMotion
             ? noMotion
             : {
                 x: [0, 20, 0, -15, 0],
                 y: [0, 18, 0, -12, 0],
-                opacity: [0.35, 0.5, 0.35, 0.45, 0.35],
+                opacity: [0.3, 0.46, 0.3, 0.4, 0.3],
               }
         "
         :transition="
@@ -164,15 +163,16 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
         "
       />
 
+      <!-- Right soft rose atmosphere -->
       <motion.div
-        class="absolute bottom-[4%] right-[4%] h-[460px] w-[460px] rounded-full bg-[#34447a]/10 blur-[170px]"
+        class="absolute bottom-[4%] right-[4%] h-[460px] w-[460px] rounded-full bg-[#7E3541]/[0.08] blur-[170px]"
         :animate="
           prefersReducedMotion
             ? noMotion
             : {
                 x: [0, -18, 0, 15, 0],
                 y: [0, -15, 0, 18, 0],
-                opacity: [0.22, 0.34, 0.22, 0.3, 0.22],
+                opacity: [0.18, 0.3, 0.18, 0.26, 0.18],
               }
         "
         :transition="
@@ -191,7 +191,7 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
         <span
           v-for="particle in dustParticles"
           :key="particle.id"
-          class="absolute rounded-full bg-[#858eba]"
+          class="absolute rounded-full bg-[#C58B92]"
           :style="{
             left: `${particle.x}%`,
             top: `${particle.y}%`,
@@ -222,7 +222,7 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
       :viewport="{ once: true, amount: 0.16 }"
     >
       <div
-        class="grid items-center gap-20 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20 xl:grid-cols-[0.9fr_1.1fr] xl:gap-28"
+        class="grid items-center gap-16 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20 xl:grid-cols-[0.9fr_1.1fr] xl:gap-24"
       >
         <!-- =================================================
              IMAGE / CELESTIAL PORTRAIT
@@ -237,26 +237,26 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
             class="absolute -left-9 top-1/2 hidden -translate-y-1/2 -rotate-90 items-center gap-3 xl:flex"
           >
             <span
-              class="text-[8px] font-medium uppercase tracking-[0.42em] text-[#858eba]/45"
+              class="text-[8px] font-medium uppercase tracking-[0.42em] text-[#C58B92]/45"
             >
               About Sammy
             </span>
 
-            <span class="h-px w-12 bg-[#858eba]/20" />
+            <span class="h-px w-12 bg-[#C58B92]/20" />
           </div>
 
           <!-- Outer celestial construction -->
           <div
-            class="absolute -inset-8 hidden rounded-[48px] border border-[#858eba]/[0.08] sm:block"
+            class="absolute -inset-8 hidden rounded-[48px] border border-[#C58B92]/[0.07] sm:block"
           />
 
           <div
-            class="absolute -inset-5 rounded-[40px] border border-[#858eba]/[0.10]"
+            class="absolute -inset-5 rounded-[40px] border border-[#C58B92]/[0.09]"
           />
 
           <!-- Rotating orbital mark -->
           <motion.div
-            class="absolute -right-8 -top-8 z-20 hidden h-20 w-20 rounded-full border border-[#858eba]/20 sm:block"
+            class="absolute -right-8 -top-8 z-20 hidden h-20 w-20 rounded-full border border-[#C58B92]/20 sm:block"
             :animate="
               prefersReducedMotion
                 ? noMotion
@@ -273,13 +273,13 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
             "
           >
             <span
-              class="absolute left-1/2 top-[-2px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#858eba] shadow-[0_0_12px_rgba(133,142,186,0.7)]"
+              class="absolute left-1/2 top-[-2px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#C58B92] shadow-[0_0_12px_rgba(197,139,146,0.65)]"
             />
           </motion.div>
 
           <!-- Image -->
           <div
-            class="relative overflow-hidden rounded-[30px] border border-[#858eba]/[0.16] bg-[#080d1c] p-1.5 shadow-[0_35px_100px_rgba(0,0,0,0.42)]"
+            class="relative overflow-hidden rounded-[30px] border border-[#C58B92]/[0.14] bg-[#1D0C13] p-1.5 shadow-[0_35px_100px_rgba(0,0,0,0.42)]"
           >
             <motion.div
               class="relative overflow-hidden rounded-[24px]"
@@ -296,19 +296,19 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
               }"
             >
               <img
-                src="/images/astro.jpg"
+                src="/images/reading.jpeg"
                 alt="Sammy during a spiritual astrology reading"
                 class="aspect-[4/5] w-full object-cover"
               />
 
-              <!-- Very subtle blue atmospheric veil -->
+              <!-- Subtle wine atmospheric veil -->
               <div
-                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#050814]/65 via-transparent to-[#182653]/10"
+                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#160B10]/70 via-transparent to-[#42141F]/10"
               />
 
               <!-- Fine inner frame -->
               <div
-                class="pointer-events-none absolute inset-3 rounded-[19px] border border-white/[0.07]"
+                class="pointer-events-none absolute inset-3 rounded-[19px] border border-[#F1E8E3]/[0.07]"
               />
             </motion.div>
           </div>
@@ -335,22 +335,20 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
           >
             <div class="flex items-center gap-3">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-full border border-[#858eba]/20 bg-[#080d1c]/90 backdrop-blur-md"
+                class="flex h-10 w-10 items-center justify-center rounded-full border border-[#C58B92]/20 bg-[#1D0C13]/90 backdrop-blur-md"
               >
-                <Sparkles class="h-3.5 w-3.5 text-[#858eba]/65" />
+                <Sparkles class="h-3.5 w-3.5 text-[#C8A77A]/75" />
               </div>
 
-              <div
-                class="border-l border-[#858eba]/20 pl-3"
-              >
+              <div class="border-l border-[#C58B92]/20 pl-3">
                 <p
-                  class="text-[7px] uppercase tracking-[0.3em] text-[#858eba]/45"
+                  class="text-[7px] uppercase tracking-[0.3em] text-[#C58B92]/45"
                 >
                   The intention
                 </p>
 
                 <p
-                  class="mt-1 font-serif text-xs text-[#e8e7e1]/65"
+                  class="mt-1 font-serif text-xs text-[#F1E8E3]/65"
                 >
                   Come as you are.
                 </p>
@@ -362,9 +360,10 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
           <div
             class="absolute -bottom-10 right-8 hidden items-center gap-2 sm:flex"
           >
-            <span class="h-px w-5 bg-[#858eba]/20" />
+            <span class="h-px w-5 bg-[#C58B92]/20" />
+
             <span
-              class="font-mono text-[7px] tracking-[0.18em] text-[#858eba]/35"
+              class="font-mono text-[7px] tracking-[0.18em] text-[#C58B92]/35"
             >
               06° 18′ N
             </span>
@@ -382,15 +381,15 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
           <!-- Section index -->
           <div class="flex items-center gap-4">
             <span
-              class="font-mono text-[9px] tracking-[0.28em] text-[#858eba]/55"
+              class="font-mono text-[9px] tracking-[0.28em] text-[#C58B92]/55"
             >
               01
             </span>
 
-            <span class="h-px w-10 bg-[#858eba]/20" />
+            <span class="h-px w-10 bg-[#C58B92]/20" />
 
             <span
-              class="text-[8px] font-medium uppercase tracking-[0.34em] text-[#858eba]/50"
+              class="text-[8px] font-medium uppercase tracking-[0.34em] text-[#C58B92]/50"
             >
               The person behind the reading
             </span>
@@ -398,23 +397,23 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
 
           <!-- Heading -->
           <h2
-            class="mt-8 max-w-2xl font-serif text-[2.8rem] font-medium leading-[1.04] tracking-[-0.04em] text-[#e8e7e1] sm:text-5xl lg:text-[57px]"
+            class="mt-7 max-w-2xl font-serif text-[2.8rem] font-medium leading-[1.04] tracking-[-0.04em] text-[#F1E8E3] sm:text-5xl lg:text-[57px]"
           >
             You don't have to
-            <span class="text-[#858eba]/80">
+            <span class="text-[#C58B92]/80">
               have it all figured out.
             </span>
           </h2>
 
           <!-- Intro -->
           <p
-            class="mt-8 font-serif text-xl leading-8 text-[#e8e7e1]/80 sm:text-[22px] sm:leading-9"
+            class="mt-7 font-serif text-xl leading-8 text-[#F1E8E3]/80 sm:text-[22px] sm:leading-9"
           >
-            Hi, I'm Sammy.
+            Hi, I'm Okechukwu.
           </p>
 
           <div
-            class="mt-7 space-y-5 text-[15px] leading-7 text-[#e8e7e1]/52 sm:text-base sm:leading-8"
+            class="mt-6 space-y-5 text-[15px] leading-7 text-[#F1E8E3]/[0.64] sm:text-base sm:leading-8"
           >
             <p>
               I believe there are moments in life when we simply need to
@@ -441,36 +440,36 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
                ================================================= -->
 
           <motion.div
-            class="relative mt-10 border-y border-[#858eba]/[0.13] py-7 sm:py-8"
+            class="relative mt-9 border-y border-[#C58B92]/[0.13] py-6 sm:py-7"
             :whileHover="
               prefersReducedMotion
                 ? {}
                 : {
-                    borderColor: 'rgba(133,142,186,0.22)',
+                    borderColor: 'rgba(197,139,146,0.22)',
                   }
             "
             :transition="{ duration: 0.5 }"
           >
             <!-- Large quotation mark -->
             <span
-              class="absolute -left-1 -top-5 font-serif text-5xl font-light leading-none text-[#858eba]/15"
+              class="absolute -left-1 -top-5 font-serif text-5xl font-light leading-none text-[#C58B92]/15"
               aria-hidden="true"
             >
               “
             </span>
 
             <p
-              class="max-w-xl font-serif text-xl leading-8 text-[#e8e7e1]/72 sm:text-[21px] sm:leading-9"
+              class="max-w-xl font-serif text-xl leading-8 text-[#F1E8E3]/72 sm:text-[21px] sm:leading-9"
             >
               I don't want to tell you who you are or what your life should
               become. I want to help you see yourself a little more clearly.
             </p>
 
-            <div class="mt-6 flex items-center gap-3">
-              <span class="h-px w-8 bg-[#858eba]/30" />
+            <div class="mt-5 flex items-center gap-3">
+              <span class="h-px w-8 bg-[#C58B92]/30" />
 
               <span
-                class="text-[8px] uppercase tracking-[0.28em] text-[#858eba]/45"
+                class="text-[8px] uppercase tracking-[0.28em] text-[#C58B92]/45"
               >
                 Sammy
               </span>
@@ -482,17 +481,17 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
                ================================================= -->
 
           <div
-            class="mt-9 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+            class="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p
-                class="text-[9px] uppercase tracking-[0.26em] text-[#858eba]/40"
+                class="text-[9px] uppercase tracking-[0.26em] text-[#C58B92]/40"
               >
                 Your questions are enough
               </p>
 
               <p
-                class="mt-2 max-w-sm text-xs leading-6 text-[#e8e7e1]/35"
+                class="mt-2 max-w-sm text-xs leading-6 text-[#F1E8E3]/35"
               >
                 You don't need to arrive with all the answers.
               </p>
@@ -510,13 +509,13 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
             >
               <Button
                 variant="ghost"
-                class="group h-auto rounded-none border-b border-[#858eba]/25 px-0 pb-2 text-sm font-medium text-[#e8e7e1]/70 hover:bg-transparent hover:text-[#e8e7e1]"
+                class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_12px_36px_rgba(107,15,26,0.24)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/55 hover:bg-[#7E3541] hover:shadow-[0_16px_45px_rgba(107,15,26,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
                 @click="openBooking"
               >
                 <span>Book a Reading</span>
 
                 <ArrowRight
-                  class="ml-3 h-4 w-4 text-[#858eba]/70 transition-transform duration-300 group-hover:translate-x-1"
+                  class="ml-3 h-4 w-4 text-[#C8A77A]/75 transition-transform duration-300 group-hover:translate-x-1"
                 />
               </Button>
             </motion.div>
@@ -530,7 +529,7 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
          ===================================================== -->
 
     <div
-      class="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050814] to-transparent"
+      class="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#160B10]/90 via-[#160B10]/35 to-transparent"
       aria-hidden="true"
     />
   </section>

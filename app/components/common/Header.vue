@@ -29,12 +29,12 @@ const navigation = [
     href: "#readings",
   },
   {
-    label: "Ancestral Karma",
-    href: "#ancestral",
+    label: "Products",
+    href: "#products",
   },
   {
-    label: "Planetary Updates",
-    href: "#planets",
+    label: "Ifa & Ifa Consultation",
+    href: "#ifa",
   },
 ];
 

@@ -3,14 +3,10 @@ import { computed, ref } from "vue";
 import {
   ArrowRight,
   CalendarDays,
-  Check,
   ChevronDown,
   Clock3,
   Heart,
   LoaderCircle,
-  Moon,
-  Orbit,
-  Sparkles,
   Star,
   Sun,
   Target,
@@ -479,56 +475,48 @@ const scrollToForm = () => {
 
 <template>
   <section
-    id="personal-daily-horoscope"
-    class="relative isolate overflow-hidden bg-transparent py-24 text-white sm:py-32"
+  id="personal-daily-horoscope"
+  class="relative isolate overflow-hidden bg-transparent py-24 text-[#F1E8E3] sm:py-32"
+>
+  <!-- =========================================================
+       COSMIC BACKGROUND
+  ========================================================== -->
+
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -left-56 top-16 h-[36rem] w-[36rem] rounded-full bg-[#6B0F1A]/20 blur-[160px]"
+  />
+
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -right-56 top-1/3 h-[40rem] w-[40rem] rounded-full bg-[#42141F]/25 blur-[170px]"
+  />
+
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute bottom-0 left-1/3 h-[30rem] w-[30rem] rounded-full bg-[#7E3541]/10 blur-[150px]"
+  />
+
+  <!-- Subtle atmospheric glow — NO GRID -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(197,139,146,0.07),transparent_42%)]"
+  />
+
+  <!-- Sparse celestial dust -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0"
   >
-    <!-- =========================================================
-         COSMIC BACKGROUND
-    ========================================================== -->
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -left-52 top-20 h-[34rem] w-[34rem] rounded-full bg-violet-700/10 blur-[150px]"
-    />
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -right-52 top-1/3 h-[38rem] w-[38rem] rounded-full bg-amber-400/10 blur-[160px]"
-    />
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute bottom-0 left-1/3 h-[28rem] w-[28rem] rounded-full bg-indigo-600/10 blur-[140px]"
-    />
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0 opacity-[0.025]"
-      style="
-        background-image:
-          linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px);
-        background-size: 72px 72px;
-      "
-    />
-
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0"
-    >
-      <span class="absolute left-[7%] top-[18%] h-1 w-1 rounded-full bg-white/50" />
-      <span class="absolute left-[17%] top-[71%] h-1.5 w-1.5 rounded-full bg-amber-200/40" />
-      <span class="absolute left-[29%] top-[13%] h-1 w-1 rounded-full bg-white/30" />
-      <span class="absolute left-[48%] top-[28%] h-1 w-1 rounded-full bg-violet-200/40" />
-      <span class="absolute left-[63%] top-[16%] h-1.5 w-1.5 rounded-full bg-white/40" />
-      <span class="absolute left-[81%] top-[38%] h-1 w-1 rounded-full bg-amber-200/50" />
-      <span class="absolute left-[93%] top-[19%] h-1 w-1 rounded-full bg-white/30" />
-      <span class="absolute left-[88%] top-[79%] h-1.5 w-1.5 rounded-full bg-violet-200/40" />
-    </div>
-
-    <!-- =========================================================
-         CONTENT
-    ========================================================== -->
+    <span class="absolute left-[7%] top-[18%] h-1 w-1 rounded-full bg-[#F1E8E3]/40" />
+    <span class="absolute left-[17%] top-[71%] h-1.5 w-1.5 rounded-full bg-[#C8A77A]/35" />
+    <span class="absolute left-[29%] top-[13%] h-1 w-1 rounded-full bg-[#F1E8E3]/25" />
+    <span class="absolute left-[48%] top-[28%] h-1 w-1 rounded-full bg-[#C58B92]/35" />
+    <span class="absolute left-[63%] top-[16%] h-1.5 w-1.5 rounded-full bg-[#F1E8E3]/30" />
+    <span class="absolute left-[81%] top-[38%] h-1 w-1 rounded-full bg-[#C8A77A]/40" />
+    <span class="absolute left-[93%] top-[19%] h-1 w-1 rounded-full bg-[#F1E8E3]/25" />
+    <span class="absolute left-[88%] top-[79%] h-1.5 w-1.5 rounded-full bg-[#C58B92]/30" />
+  </div>
 
     <div class="relative mx-auto max-w-7xl px-6 lg:px-8">
 
@@ -537,65 +525,68 @@ const scrollToForm = () => {
       ======================================================== -->
 
       <div
-        v-if="!showResults"
-        class="mx-auto max-w-3xl text-center"
+        v-if="!showResults && !loading"
+        class="relative mx-auto max-w-4xl text-center"
       >
+        <!-- localized readability layer -->
         <div
-          class="mb-7 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 backdrop-blur-xl"
+          aria-hidden="true"
+          class="pointer-events-none absolute -inset-x-12 -inset-y-12 -z-10 rounded-[4rem] bg-[#160B10]/20 backdrop-blur-[18px]"
+        />
+
+        <div
+          class="mb-7 inline-flex items-center gap-3 rounded-full border border-[#C58B92]/15 bg-[#160B10]/35 px-4 py-2 backdrop-blur-xl"
         >
           <span class="relative flex h-2 w-2">
             <span
-              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-40"
+              class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#C8A77A] opacity-30"
             />
             <span
-              class="relative inline-flex h-2 w-2 rounded-full bg-amber-300"
+              class="relative inline-flex h-2 w-2 rounded-full bg-[#C8A77A]"
             />
           </span>
 
           <span
-            class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/50"
+            class="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#C58B92]/65"
           >
             Personal Vedic Horoscope
           </span>
         </div>
 
         <h2
-          class="text-4xl font-medium tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl"
+          class="text-4xl font-medium tracking-[-0.05em] text-[#F1E8E3] sm:text-5xl lg:text-6xl"
         >
           Discover your
           <span
-            class="bg-gradient-to-r from-amber-200 via-amber-100 to-white bg-clip-text text-transparent"
+            class="bg-gradient-to-r from-[#C8A77A] via-[#C58B92] to-[#F1E8E3] bg-clip-text text-transparent"
           >
             personal sky.
           </span>
         </h2>
 
         <p
-          class="mx-auto mt-6 max-w-2xl text-base leading-8 text-white/50 sm:text-lg"
+          class="mx-auto mt-6 max-w-2xl text-base leading-8 text-[#F1E8E3]/55 sm:text-lg"
         >
           Your daily horoscope becomes more personal when we calculate
           the current Vedic sky against your own birth chart.
         </p>
 
         <div
-          class="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.18em] text-white/25"
+          class="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[10px] uppercase tracking-[0.18em] text-[#F1E8E3]/30"
         >
           <span class="inline-flex items-center gap-2">
-            <Star class="h-3.5 w-3.5 text-amber-200/50" />
             Sidereal astrology
           </span>
 
-          <span class="hidden h-3 w-px bg-white/10 sm:block" />
+          <span class="hidden h-3 w-px bg-[#C58B92]/15 sm:block" />
 
           <span class="inline-flex items-center gap-2">
-            <Moon class="h-3.5 w-3.5 text-indigo-200/50" />
             Moon sign
           </span>
 
-          <span class="hidden h-3 w-px bg-white/10 sm:block" />
+          <span class="hidden h-3 w-px bg-[#C58B92]/15 sm:block" />
 
           <span class="inline-flex items-center gap-2">
-            <Orbit class="h-3.5 w-3.5 text-violet-200/50" />
             Daily transits
           </span>
         </div>
@@ -606,17 +597,17 @@ const scrollToForm = () => {
       ======================================================== -->
 
       <div
-        v-if="!showResults"
+        v-if="!showResults && !loading"
         id="personal-horoscope-form"
         class="mx-auto mt-14 max-w-4xl"
       >
         <form
-          class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-[0_30px_100px_rgba(0,0,0,.35)] backdrop-blur-2xl"
+          class="relative overflow-hidden rounded-[2.25rem] border border-[#C58B92]/15 bg-[#160B10]/45 shadow-[0_40px_120px_rgba(0,0,0,.38)] backdrop-blur-[22px]"
           @submit.prevent="fetchPersonalHoroscope"
         >
           <div
             aria-hidden="true"
-            class="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-amber-300/8 blur-[100px]"
+            class="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#6B0F1A]/20 blur-[120px]"
           />
 
           <div
@@ -624,14 +615,14 @@ const scrollToForm = () => {
           >
             <div class="flex items-start gap-4">
               <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-amber-200/15 bg-amber-200/5"
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/15 bg-[#6B0F1A]/15"
               >
-                <UserRound class="h-5 w-5 text-amber-200/70" />
+                <UserRound class="h-5 w-5 text-[#C8A77A]/75" />
               </div>
 
               <div>
                 <p
-                  class="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-200/55"
+                  class="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#C8A77A]/65"
                 >
                   Your birth details
                 </p>
@@ -640,7 +631,7 @@ const scrollToForm = () => {
                   Tell us when and where you entered the world.
                 </h3>
 
-                <p class="mt-2 text-sm leading-6 text-white/35">
+                <p class="mt-2 text-sm leading-6 text-[#F1E8E3]/40">
                   These details are used to calculate your personal
                   Vedic chart and today's planetary influences.
                 </p>
@@ -669,18 +660,18 @@ const scrollToForm = () => {
                       Month
                     </option>
 
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
+                    <option value="1" class="text-black">January</option>
+                    <option value="2" class="text-black">February</option>
+                    <option value="3" class="text-black">March</option>
+                    <option value="4" class="text-black">April</option>
+                    <option value="5" class="text-black">May</option>
+                    <option value="6" class="text-black">June</option>
+                    <option value="7" class="text-black">July</option>
+                    <option value="8" class="text-black">August</option>
+                    <option value="9" class="text-black">September</option>
+                    <option value="10" class="text-black">October</option>
+                    <option value="11" class="text-black">November</option>
+                    <option value="12" class="text-black">December</option>
                   </select>
 
                   <ChevronDown
@@ -701,6 +692,7 @@ const scrollToForm = () => {
                       v-for="day in 31"
                       :key="day"
                       :value="String(day)"
+                      class="text-black"
                     >
                       {{ day }}
                     </option>
@@ -751,6 +743,7 @@ const scrollToForm = () => {
                       v-for="hour in 24"
                       :key="hour - 1"
                       :value="String(hour - 1)"
+                      class="text-black"
                     >
                       {{ String(hour - 1).padStart(2, "0") }}
                     </option>
@@ -774,6 +767,7 @@ const scrollToForm = () => {
                       v-for="minute in 60"
                       :key="minute - 1"
                       :value="String(minute - 1)"
+                      class="text-black"
                     >
                       {{ String(minute - 1).padStart(2, "0") }}
                     </option>
@@ -834,12 +828,6 @@ const scrollToForm = () => {
               class="flex flex-col gap-4 border-t border-white/6 pt-7 sm:flex-row sm:items-center sm:justify-between"
             >
               <div class="flex items-start gap-3">
-                <div
-                  class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-emerald-200/10 bg-emerald-200/5"
-                >
-                  <Check class="h-3 w-3 text-emerald-200/70" />
-                </div>
-
                 <p class="max-w-md text-[11px] leading-5 text-white/25">
                   Your birth details are used only to calculate your
                   horoscope for this request.
@@ -849,16 +837,11 @@ const scrollToForm = () => {
               <Button
                 type="submit"
                 :disabled="loading"
-                class="group h-14 rounded-full bg-white px-7 text-sm font-medium text-[#0b0913] shadow-xl shadow-black/20 transition-all hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_12px_36px_rgba(107,15,26,0.24)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/55 hover:bg-[#7E3541] hover:shadow-[0_16px_45px_rgba(107,15,26,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
               >
                 <LoaderCircle
                   v-if="loading"
                   class="mr-2 h-4 w-4 animate-spin"
-                />
-
-                <Sparkles
-                  v-else
-                  class="mr-2 h-4 w-4"
                 />
 
                 {{
@@ -879,7 +862,7 @@ const scrollToForm = () => {
         <!-- Privacy / philosophy -->
         <div class="mt-8 flex justify-center">
           <p
-            class="max-w-xl text-center text-[10px] leading-6 text-white/15"
+            class="max-w-xl text-center text-[14px] leading-6 text-white/15"
           >
             The sky is shared. Your chart is personal. This experience
             uses your birth information to calculate a Vedic daily
@@ -935,8 +918,6 @@ const scrollToForm = () => {
           <div
             class="mb-6 inline-flex items-center gap-3 rounded-full border border-amber-200/10 bg-amber-200/[0.04] px-4 py-2"
           >
-            <Sparkles class="h-3.5 w-3.5 text-amber-200/70" />
-
             <span
               class="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-200/55"
             >
@@ -1030,8 +1011,6 @@ const scrollToForm = () => {
             class="rounded-[1.5rem] border border-white/8 bg-white/[0.025] p-6"
           >
             <div class="flex items-center gap-3">
-              <Sparkles class="h-4 w-4 text-amber-200/60" />
-
               <span
                 class="text-[10px] uppercase tracking-[0.2em] text-white/25"
               >
@@ -1654,8 +1633,6 @@ const scrollToForm = () => {
             <div class="max-w-2xl">
 
               <div class="flex items-center gap-3">
-                <Sparkles class="h-4 w-4 text-amber-200/70" />
-
                 <span
                   class="text-[10px] font-semibold uppercase tracking-[0.28em] text-amber-200/50"
                 >
@@ -1696,7 +1673,7 @@ const scrollToForm = () => {
 
         <!-- Disclaimer -->
         <p
-          class="mx-auto mt-8 max-w-2xl text-center text-[10px] leading-6 text-white/15"
+          class="mx-auto mt-8 max-w-2xl text-center text-[14px] leading-6 text-white/15"
         >
           Vedic astrology is presented as a tool for reflection,
           awareness, and personal exploration. It is not a substitute
