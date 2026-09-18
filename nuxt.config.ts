@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     // NEVER expose these inside `public`
     // -----------------------------------------------------------------------
 
-    mongodbUri: process.env.MONGODB_URI || "",
+    mongodbUri: process.env.MONGODB_URI,
     jwtSecret: process.env.JWT_SECRET || "",
 
     freeAstroApiKey: process.env.FREE_ASTRO_API_KEY || "",

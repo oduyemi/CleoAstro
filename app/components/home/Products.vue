@@ -20,131 +20,111 @@ interface Product {
   featured?: boolean;
 }
 
+
 const products: Product[] = [
   {
     id: 1,
     number: "01",
-    name: "Goodluck Charm Necklace",
+    name: "Cleo Astro Beeds",
     category: "Spiritual Jewelry",
     description:
-      "A meaningful everyday piece created as a personal symbol of intention, protection, and good fortune.",
-    price: "₦45,000",
-    image: "/images/products/goodluckcharm.webp",
+      "A symbolic beaded piece created for everyday wear, personal intention, and connection to your spiritual journey.",
+    price: "₦50,000",
+    image: "/images/products/beads.png",
   },
   {
     id: 2,
     number: "02",
-    name: "Cleo Astro Signature Hoodie",
-    category: "Apparel",
+    name: "Cleo Astra Clothes",
+    category: "Spiritual Wears",
     description:
-      "A premium statement hoodie inspired by the mystery of the stars and the journey within.",
-    price: "₦65,000",
-    image: "/images/products/hoodie.jpeg",
+      "Meaningful spiritual wear designed to blend everyday style with intention, protection, and the energy of personal expression.",
+    price: "₦70,000",
+    image: "/images/products/clothes.png",
   },
   {
     id: 3,
     number: "03",
-    name: "Cleo Astro T-Shirt",
+    name: "Cleo Astro Cap",
     category: "Apparel",
     description:
-      "A clean everyday essential carrying the Cleo Astro spirit wherever you go.",
-    price: "₦35,000",
-    image: "/images/products/astro-tshirt.png",
+      "A distinctive everyday cap inspired by the cosmos, crafted to carry the Cleo Astro spirit with effortless style.",
+    price: "₦50,000",
+    image: "/images/products/cap.webp",
   },
   {
     id: 4,
     number: "04",
-    name: "Cosmic Symbol T-Shirt",
-    category: "Apparel",
+    name: "Cleo Astro Perfumes",
+    category: "Perfume",
     description:
-      "A symbolic design inspired by celestial movement, intuition, and self-discovery.",
-    price: "₦38,000",
-    image: "/images/products/tshirt.jpeg",
+      "A refined fragrance experience created to complement your presence, evoke intention, and leave a memorable impression.",
+    price: "₦70,000", // between 70k n 3m
+    image: "/images/products/perfumes.png",
   },
   {
     id: 5,
     number: "05",
-    name: "Sacred Energy Hoodie",
-    category: "Apparel",
+    name: "Cosmic Dogs",
+    category: "Dogs",
     description:
-      "A heavyweight hoodie designed around the idea of carrying your inner world with you.",
-    price: "₦70,000",
-    image: "/images/products/hoodie.jpeg",
+      "Thoughtfully selected companion dogs for those seeking a loyal, meaningful presence and a deeper connection with their everyday journey.",
+    price: "₦150,000",  // between 150k n 3m
+    image: "/images/products/dog.png",
   },
   {
     id: 6,
     number: "06",
-    name: "Astrology Pendant",
-    category: "Spiritual Jewelry",
+    name: "Sacred Flip Flops",
+    category: "Apparel",
     description:
-      "A subtle celestial pendant designed as a wearable reminder to stay connected to your path.",
-    price: "₦40,000",
-    image: "/images/products/goodluckcharm.webp",
+      "Comfortable everyday footwear infused with the Cleo Astro spirit, designed for relaxed movement and effortless personal style.",
+    price: "₦100,000",
+    image: "/images/products/flipflop.png",
   },
   {
     id: 7,
     number: "07",
-    name: "Moon Phase Necklace",
-    category: "Spiritual Jewelry",
+    name: "Astrology Jalamai",
+    category: "Apparel",
     description:
-      "A celestial-inspired necklace reflecting the rhythm of cycles, change, and renewal.",
-    price: "₦42,000",
-    image: "/images/products/goodluckcharm.webp",
+      "A distinctive piece inspired by astrology and spiritual tradition, created as a wearable expression of identity, intention, and personal alignment.",
+    price: "₦30,000",
+    image: "/images/products/jalamia.png",
   },
   {
     id: 8,
     number: "08",
-    name: "Cleo Astro Cap",
-    category: "Accessories",
+    name: "Sea Water",
+    category: "Spiritual Jewelry",
     description:
-      "A minimal branded cap for everyday wear, finished with the Cleo Astro identity.",
-    price: "₦25,000",
-    image: "/images/products/cap.webp",
+      "A carefully presented spiritual essential inspired by the cleansing, renewing, and transformative qualities associated with the sea.",
+    price: "₦5,000",
+    image: "/images/products/seawater.png",
   },
   {
     id: 9,
     number: "09",
-    name: "Cosmic Tote",
+    name: "Salt / Alum / Nzu",
     category: "Accessories",
     description:
-      "A practical everyday tote carrying a little piece of the cosmic world with you.",
-    price: "₦22,000",
-    image: "/images/products/tote.webp",
+      "Traditional spiritual essentials brought together for personal rituals, cleansing practices, and intentional everyday use.",
+    price: "₦5,000",
+    image: "/images/products/nzu.png",
   },
   {
     id: 10,
     number: "10",
-    name: "Celestial Journal",
-    category: "Reflection",
+    name: "Cleo Astro Clay Pot",
+    category: "Accessories",
     description:
-      "A beautiful space for recording dreams, intentions, reflections, and the questions that matter.",
-    price: "₦28,000",
-    image: "/images/products/journal.webp",
-  },
-  {
-    id: 11,
-    number: "11",
-    name: "Cleo Astro Bracelet",
-    category: "Spiritual Jewelry",
-    description:
-      "A simple symbolic bracelet designed to become part of your everyday ritual.",
-    price: "₦30,000",
-    image: "/images/products/bracelet.webp",
-  },
-  {
-    id: 12,
-    number: "12",
-    name: "Cosmic Gift Set",
-    category: "Gift Set",
-    description:
-      "A curated collection of Cleo Astro pieces created for someone beginning their own journey of reflection.",
-    price: "₦95,000",
-    image: "/images/products/giftset.jpeg",
+      "A handcrafted clay vessel inspired by traditional symbolism and spiritual practice, bringing an earthy, grounded presence to your space.",
+    price: "₦70,000",
+    image: "/images/products/pot.png",
   },
 ];
 
 const activeProduct = ref(0);
-
 const currentProduct = computed<Product>(() => {
   const product = products[activeProduct.value];
 

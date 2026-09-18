@@ -5,6 +5,7 @@ import Readings from "@/components/home/PersonalDailyHoroscope.vue";
 import PersonalDailyHoroscope from "@/components/home/Readings.vue";
 import Products from "@/components/home/Products.vue";
 import Ifa from "@/components/home/Ifa.vue";
+import Donations from "@/components/home/Donations.vue";
 </script>
 
 <template>
@@ -15,5 +16,6 @@ import Ifa from "@/components/home/Ifa.vue";
     <Readings />
     <Products />
     <Ifa />
+    <Donations />
   </main>
 </template>

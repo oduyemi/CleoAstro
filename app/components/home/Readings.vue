@@ -589,8 +589,9 @@ onMounted(() => {
         <p
           class="mx-auto mt-6 max-w-2xl text-sm leading-7 text-[#F1E8E3]/50 sm:text-base"
         >
-          A daily reflection for your Rashi, inspired by the rhythms
-          of Vedic astrology and the movement of the sky.
+          Inspired by the Rythms of Vedic Astrology Merged with 
+          traditional ODINALA (Earth holds the Secrets) and the 
+          movement of the sky.
         </p>
 
         <div

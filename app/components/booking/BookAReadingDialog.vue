@@ -8,7 +8,9 @@ import {
   CheckCircle2,
   Clock3,
   Compass,
+  Copy,
   Info,
+  Landmark,
   LoaderCircle,
   Sparkles,
   X,
@@ -42,6 +44,20 @@ interface BookingDetails {
   question: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Bank transfer details                                                      */
+/* -------------------------------------------------------------------------- */
+
+const BANK_DETAILS = {
+  bankName: "YOUR BANK NAME",
+  accountName: "CLEO ASTRO",
+  accountNumber: "0000000000",
+};
+
+/* -------------------------------------------------------------------------- */
+/* Props / Emits                                                              */
+/* -------------------------------------------------------------------------- */
+
 const props = withDefaults(
   defineProps<{
     open?: boolean;
@@ -56,11 +72,17 @@ const emit = defineEmits<{
   select: [reading: Reading];
 }>();
 
+/* -------------------------------------------------------------------------- */
+/* State                                                                      */
+/* -------------------------------------------------------------------------- */
+
 const step = ref<BookingStep>("readings");
 const selectedReadingId = ref<string | null>(null);
+
 const loading = ref(false);
 const errorMessage = ref("");
 const paymentReference = ref("");
+const copiedField = ref<"account" | "reference" | null>(null);
 
 const bookingDetails = ref<BookingDetails>({
   fullName: "",
@@ -178,6 +200,45 @@ const formatPrice = (price: number) =>
   `₦${price.toLocaleString("en-NG")}`;
 
 /* -------------------------------------------------------------------------- */
+/* Booking reference                                                          */
+/* -------------------------------------------------------------------------- */
+
+const createBookingReference = () => {
+  const timestamp = Date.now().toString().slice(-8);
+  const random = Math.random()
+    .toString(36)
+    .substring(2, 6)
+    .toUpperCase();
+
+  return `CLEO-${timestamp}-${random}`;
+};
+
+/* -------------------------------------------------------------------------- */
+/* Clipboard                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const copyToClipboard = async (
+  value: string,
+  field: "account" | "reference",
+) => {
+  if (!import.meta.client) return;
+
+  try {
+    await navigator.clipboard.writeText(value);
+
+    copiedField.value = field;
+
+    window.setTimeout(() => {
+      if (copiedField.value === field) {
+        copiedField.value = null;
+      }
+    }, 1800);
+  } catch (error) {
+    console.error("Unable to copy value:", error);
+  }
+};
+
+/* -------------------------------------------------------------------------- */
 /* Selection                                                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -204,64 +265,61 @@ const continueToPayment = () => {
   }
 
   errorMessage.value = "";
+
+  /*
+   * Generate the booking reference before the user reaches
+   * the transfer instructions.
+   */
+  paymentReference.value = createBookingReference();
+
   step.value = "payment";
 };
 
 /* -------------------------------------------------------------------------- */
-/* Payment                                                                    */
+/* Payment / transfer confirmation                                            */
 /* -------------------------------------------------------------------------- */
 
-const initializePayment = async () => {
-  if (!import.meta.client) {
+const confirmTransfer = async () => {
+  if (!selectedReading.value || !detailsValid.value) {
+    errorMessage.value =
+      "Please complete your booking details before continuing.";
+
     return;
   }
 
-  if (!detailsValid.value || !selectedReading.value) {
-    errorMessage.value =
-      "Please complete your details before continuing.";
-
-    return;
+  if (!paymentReference.value) {
+    paymentReference.value = createBookingReference();
   }
 
   loading.value = true;
   errorMessage.value = "";
 
   try {
-    const response = await $fetch<{
-      accessCode: string;
-      authorizationUrl?: string;
-      reference: string;
-    }>("/api/paystack/initialize", {
+    await $fetch("/api/bookings", {
       method: "POST",
       body: {
+        reference: paymentReference.value,
+
         readingId: selectedReading.value.id,
+        readingName: selectedReading.value.name,
+        amount: selectedReading.value.price,
+
         ...bookingDetails.value,
+
+        paymentMethod: "bank-transfer",
+        paymentStatus: "pending",
       },
     });
 
-    paymentReference.value = response.reference;
-
-    /*
-     * Paystack must only be loaded in the browser.
-     * Keeping this dynamic import here also prevents
-     * currentScript-related SSR errors.
-     */
-    const { default: PaystackPop } =
-      await import("@paystack/inline-js");
-
-    const paystack = new PaystackPop();
-
-    paystack.resumeTransaction(response.accessCode);
-
-    loading.value = false;
+    step.value = "confirmed";
   } catch (err) {
-    console.error("Paystack initialization failed:", err);
+    console.error("Booking submission failed:", err);
 
     errorMessage.value =
       err instanceof Error
         ? err.message
-        : "Unable to initialize payment. Please try again.";
-
+        : "We couldn't submit your booking confirmation. Please try again.";
+  } finally {
     loading.value = false;
   }
 };
@@ -294,6 +352,8 @@ const reset = () => {
   selectedReadingId.value = null;
   paymentReference.value = "";
   errorMessage.value = "";
+  copiedField.value = null;
+  loading.value = false;
 
   bookingDetails.value = {
     fullName: "",
@@ -331,7 +391,7 @@ watch(
         ============================================================= -->
 
         <div
-          class="absolute inset-0 bg-[#0D070A]/85 backdrop-blur-[12px]"
+          class="absolute inset-0 bg-[#0D070A]/88 backdrop-blur-[12px]"
           @click="close"
         />
 
@@ -350,27 +410,22 @@ watch(
             class="pointer-events-none absolute inset-0 overflow-hidden"
             aria-hidden="true"
           >
-            <!-- Main red atmosphere -->
             <div
               class="absolute -right-48 -top-48 h-[34rem] w-[34rem] rounded-full bg-[#6B0F1A]/[0.12] blur-[130px]"
             />
 
-            <!-- Burgundy atmosphere -->
             <div
               class="absolute -bottom-48 -left-48 h-[30rem] w-[30rem] rounded-full bg-[#42141F]/[0.18] blur-[120px]"
             />
 
-            <!-- Soft rose -->
             <div
               class="absolute left-1/2 top-0 h-[18rem] w-[32rem] -translate-x-1/2 rounded-full bg-[#A45A65]/[0.025] blur-[100px]"
             />
 
-            <!-- Top editorial line -->
             <div
               class="absolute left-1/2 top-0 h-px w-[72%] -translate-x-1/2 bg-gradient-to-r from-transparent via-[#C8A77A]/25 to-transparent"
             />
 
-            <!-- Subtle center glow -->
             <div
               class="absolute left-1/2 top-[45%] h-[20rem] w-[20rem] -translate-x-1/2 rounded-full bg-[#7E3541]/[0.025] blur-[100px]"
             />
@@ -419,11 +474,11 @@ watch(
                   </span>
 
                   <span v-else-if="step === 'payment'">
-                    Review & payment
+                    Complete your booking
                   </span>
 
                   <span v-else>
-                    You're booked
+                    Thank you for booking
                   </span>
                 </h2>
 
@@ -440,13 +495,13 @@ watch(
                   </span>
 
                   <span v-else-if="step === 'payment'">
-                    Review your consultation details before completing
-                    payment.
+                    Make your transfer using the details below, then
+                    let me know once it has been completed.
                   </span>
 
                   <span v-else>
-                    Your payment has been confirmed and your reading
-                    request has been received.
+                    Your booking request has been received. I'll contact
+                    you as soon as your payment is received and confirmed.
                   </span>
                 </p>
               </div>
@@ -476,7 +531,7 @@ watch(
                 v-for="(label, index) in [
                   'Reading',
                   'Details',
-                  'Payment',
+                  'Transfer',
                 ]"
                 :key="label"
               >
@@ -549,7 +604,6 @@ watch(
                   "
                   @click="selectReading(reading)"
                 >
-                  <!-- Selected glow -->
                   <div
                     v-if="selectedReadingId === reading.id"
                     class="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-[#6B0F1A]/20 blur-[45px]"
@@ -674,7 +728,6 @@ watch(
               v-else-if="step === 'details'"
               class="mx-auto max-w-3xl"
             >
-              <!-- Selected reading -->
               <div
                 class="relative mb-6 overflow-hidden rounded-2xl border border-[#C8A77A]/15 bg-[#42141F]/15 p-4"
               >
@@ -757,11 +810,8 @@ watch(
                 </label>
               </div>
 
-              <!-- Birth details divider -->
               <div class="my-8 flex items-center gap-3">
-                <span
-                  class="h-px flex-1 bg-[#C58B92]/10"
-                />
+                <span class="h-px flex-1 bg-[#C58B92]/10" />
 
                 <span
                   class="text-[8px] uppercase tracking-[0.28em] text-[#C8A77A]/45"
@@ -769,9 +819,7 @@ watch(
                   Birth details
                 </span>
 
-                <span
-                  class="h-px flex-1 bg-[#C58B92]/10"
-                />
+                <span class="h-px flex-1 bg-[#C58B92]/10" />
               </div>
 
               <div class="grid gap-5 sm:grid-cols-2">
@@ -829,7 +877,6 @@ watch(
                 </label>
               </div>
 
-              <!-- Information note -->
               <div
                 class="mt-6 flex gap-3 rounded-2xl border border-[#C58B92]/10 bg-[#261018]/35 p-4"
               >
@@ -848,13 +895,15 @@ watch(
             </div>
 
             <!-- ========================================================
-                 STEP 3 — PAYMENT
+                 STEP 3 — BANK TRANSFER
             ========================================================= -->
 
             <div
               v-else-if="step === 'payment'"
               class="mx-auto max-w-2xl"
             >
+              <!-- Booking summary -->
+
               <div
                 class="overflow-hidden rounded-[24px] border border-[#C58B92]/10 bg-[#261018]/40"
               >
@@ -866,7 +915,7 @@ watch(
                   <p
                     class="relative z-10 text-[8px] uppercase tracking-[0.28em] text-[#C58B92]/35"
                   >
-                    Your consultation
+                    Booking summary
                   </p>
 
                   <div
@@ -880,7 +929,7 @@ watch(
                       </h3>
 
                       <div
-                        class="mt-3 flex items-center gap-3 text-xs text-[#C58B92]/55"
+                        class="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#C58B92]/55"
                       >
                         <span>
                           {{ selectedReading?.duration }}
@@ -907,9 +956,7 @@ watch(
                     class="relative z-10 my-6 h-px bg-[#C58B92]/10"
                   />
 
-                  <div
-                    class="relative z-10 space-y-3 text-xs"
-                  >
+                  <div class="space-y-3 text-xs">
                     <div class="flex justify-between">
                       <span class="text-[#C58B92]/45">
                         Consultation
@@ -937,25 +984,232 @@ watch(
                     </div>
                   </div>
                 </div>
+              </div>
 
+              <!-- Transfer instructions -->
+
+              <div
+                class="relative mt-5 overflow-hidden rounded-[24px] border border-[#C8A77A]/20 bg-[#42141F]/15"
+              >
                 <div
-                  class="border-t border-[#C58B92]/10 bg-[#1D0C13]/60 p-5 sm:p-7"
-                >
-                  <div class="flex gap-3">
-                    <Info
-                      class="mt-0.5 h-4 w-4 shrink-0 text-[#C8A77A]/55"
-                    />
+                  class="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#6B0F1A]/15 blur-[55px]"
+                />
 
-                    <p
-                      class="text-[11px] leading-5 text-[#C58B92]/50"
+                <div class="relative z-10 p-5 sm:p-7">
+                  <div class="flex items-start gap-4">
+                    <div
+                      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/20 bg-[#6B0F1A]/15"
                     >
-                      You'll be securely redirected to Paystack's
-                      checkout to complete your payment. Your card or
-                      banking details are handled by Paystack and are
-                      never stored by this website.
-                    </p>
+                      <Landmark
+                        class="h-5 w-5 text-[#C8A77A]/75"
+                        stroke-width="1.3"
+                      />
+                    </div>
+
+                    <div>
+                      <p
+                        class="text-[8px] uppercase tracking-[0.3em] text-[#C8A77A]/55"
+                      >
+                        Bank transfer
+                      </p>
+
+                      <h3
+                        class="mt-2 font-serif text-xl text-[#F1E8E3]"
+                      >
+                        Transfer the consultation fee
+                      </h3>
+
+                      <p
+                        class="mt-2 text-xs leading-5 text-[#C58B92]/55"
+                      >
+                        Please make your transfer using the account
+                        details below. Use your booking reference as
+                        the transfer narration where possible.
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Account details -->
+
+                  <div class="mt-7 space-y-3">
+                    <div
+                      class="flex items-center justify-between gap-4 rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/55 px-4 py-4"
+                    >
+                      <div>
+                        <p
+                          class="text-[8px] uppercase tracking-[0.24em] text-[#C58B92]/35"
+                        >
+                          Bank
+                        </p>
+
+                        <p
+                          class="mt-1 text-sm text-[#F1E8E3]/80"
+                        >
+                          {{ BANK_DETAILS.bankName }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      class="flex items-center justify-between gap-4 rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/55 px-4 py-4"
+                    >
+                      <div>
+                        <p
+                          class="text-[8px] uppercase tracking-[0.24em] text-[#C58B92]/35"
+                        >
+                          Account name
+                        </p>
+
+                        <p
+                          class="mt-1 text-sm text-[#F1E8E3]/80"
+                        >
+                          {{ BANK_DETAILS.accountName }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      class="flex items-center justify-between gap-4 rounded-xl border border-[#C8A77A]/20 bg-[#1D0C13]/65 px-4 py-4"
+                    >
+                      <div class="min-w-0">
+                        <p
+                          class="text-[8px] uppercase tracking-[0.24em] text-[#C58B92]/35"
+                        >
+                          Account number
+                        </p>
+
+                        <p
+                          class="mt-1 truncate font-mono text-sm tracking-[0.08em] text-[#F1E8E3]"
+                        >
+                          {{ BANK_DETAILS.accountNumber }}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="flex h-9 shrink-0 items-center gap-2 rounded-full border border-[#C8A77A]/15 bg-[#6B0F1A]/15 px-3 text-[9px] uppercase tracking-[0.16em] text-[#C8A77A]/70 transition-all duration-300 hover:border-[#C8A77A]/30 hover:bg-[#6B0F1A]/25 hover:text-[#F1E8E3]"
+                        @click="
+                          copyToClipboard(
+                            BANK_DETAILS.accountNumber,
+                            'account',
+                          )
+                        "
+                      >
+                        <Check
+                          v-if="copiedField === 'account'"
+                          class="h-3.5 w-3.5"
+                        />
+
+                        <Copy
+                          v-else
+                          class="h-3.5 w-3.5"
+                        />
+
+                        {{
+                          copiedField === "account"
+                            ? "Copied"
+                            : "Copy"
+                        }}
+                      </button>
+                    </div>
+
+                    <!-- Amount -->
+
+                    <div
+                      class="mt-4 flex items-center justify-between rounded-xl border border-[#C8A77A]/15 bg-[#6B0F1A]/10 px-4 py-4"
+                    >
+                      <div>
+                        <p
+                          class="text-[8px] uppercase tracking-[0.24em] text-[#C58B92]/35"
+                        >
+                          Amount to transfer
+                        </p>
+
+                        <p
+                          class="mt-1 text-lg font-medium text-[#C8A77A]/90"
+                        >
+                          {{ formatPrice(selectedReading?.price ?? 0) }}
+                        </p>
+                      </div>
+
+                      <CalendarDays
+                        class="h-5 w-5 text-[#C8A77A]/35"
+                        stroke-width="1.2"
+                      />
+                    </div>
+
+                    <!-- Reference -->
+
+                    <div
+                      class="rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/45 px-4 py-4"
+                    >
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="min-w-0">
+                          <p
+                            class="text-[8px] uppercase tracking-[0.24em] text-[#C58B92]/35"
+                          >
+                            Booking reference
+                          </p>
+
+                          <p
+                            class="mt-1 truncate font-mono text-sm tracking-[0.08em] text-[#F1E8E3]/75"
+                          >
+                            {{ paymentReference }}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          class="flex h-9 shrink-0 items-center gap-2 rounded-full border border-[#C58B92]/10 bg-[#261018]/60 px-3 text-[9px] uppercase tracking-[0.16em] text-[#C58B92]/60 transition-all duration-300 hover:border-[#C58B92]/25 hover:text-[#F1E8E3]"
+                          @click="
+                            copyToClipboard(
+                              paymentReference,
+                              'reference',
+                            )
+                          "
+                        >
+                          <Check
+                            v-if="copiedField === 'reference'"
+                            class="h-3.5 w-3.5"
+                          />
+
+                          <Copy
+                            v-else
+                            class="h-3.5 w-3.5"
+                          />
+
+                          {{
+                            copiedField === "reference"
+                              ? "Copied"
+                              : "Copy"
+                          }}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              <!-- Important note -->
+
+              <div
+                class="mt-5 flex gap-3 rounded-2xl border border-[#C58B92]/10 bg-[#261018]/35 p-4"
+              >
+                <Info
+                  class="mt-0.5 h-4 w-4 shrink-0 text-[#C8A77A]/60"
+                />
+
+                <p
+                  class="text-[11px] leading-5 text-[#C58B92]/55"
+                >
+                  After making the transfer, click
+                  <span class="text-[#F1E8E3]/70">
+                    "I've made the transfer"
+                  </span>
+                  below. This tells me to look out for your payment;
+                  your booking becomes confirmed once the transfer is
+                  received and checked.
+                </p>
               </div>
             </div>
 
@@ -974,6 +1228,10 @@ watch(
                   class="absolute inset-[-8px] rounded-full border border-[#C58B92]/[0.06]"
                 />
 
+                <div
+                  class="absolute inset-[-16px] rounded-full border border-[#C8A77A]/[0.035]"
+                />
+
                 <CheckCircle2
                   class="h-9 w-9 text-[#C8A77A]/80"
                   stroke-width="1.4"
@@ -983,50 +1241,102 @@ watch(
               <p
                 class="mt-7 text-[9px] uppercase tracking-[0.3em] text-[#C8A77A]/55"
               >
-                Payment confirmed
+                Booking received
               </p>
 
               <h3
                 class="mt-3 font-serif text-3xl tracking-[-0.02em] text-[#F1E8E3]"
               >
-                Your reading is booked.
+                Thank you for booking.
               </h3>
 
               <p
                 class="mx-auto mt-4 max-w-md text-sm leading-7 text-[#C58B92]/65"
               >
-                Thank you, {{ bookingDetails.fullName }}. Your
-                consultation request has been received. We'll use the
-                details you provided to prepare for your reading.
+                Thank you,
+                {{ bookingDetails.fullName }}. Your booking request
+                has been received. I'll contact you as soon as your
+                payment is received and confirmed.
               </p>
 
-              <div
-                class="mx-auto mt-7 max-w-sm rounded-2xl border border-[#C58B92]/10 bg-[#261018]/35 p-5 text-left"
-              >
-                <div class="flex justify-between gap-4">
-                  <span class="text-xs text-[#C58B92]/45">
-                    Reading
-                  </span>
+              <!-- Status -->
 
-                  <span
-                    class="text-right text-xs text-[#F1E8E3]/70"
-                  >
-                    {{ selectedReading?.name }}
-                  </span>
+              <div
+                class="mx-auto mt-7 max-w-sm overflow-hidden rounded-2xl border border-[#C58B92]/10 bg-[#261018]/35 text-left"
+              >
+                <div class="p-5">
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-[#C8A77A]/10"
+                    >
+                      <LoaderCircle
+                        class="h-4 w-4 animate-spin text-[#C8A77A]/70"
+                      />
+                    </span>
+
+                    <div>
+                      <p
+                        class="text-[8px] uppercase tracking-[0.25em] text-[#C8A77A]/50"
+                      >
+                        Payment status
+                      </p>
+
+                      <p
+                        class="mt-1 text-xs text-[#F1E8E3]/65"
+                      >
+                        Awaiting payment confirmation
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="mt-3 flex justify-between gap-4">
-                  <span class="text-xs text-[#C58B92]/45">
-                    Reference
-                  </span>
+                <div
+                  class="border-t border-[#C58B92]/10 px-5 py-4"
+                >
+                  <div class="flex justify-between gap-4">
+                    <span class="text-xs text-[#C58B92]/45">
+                      Reading
+                    </span>
 
-                  <span
-                    class="max-w-[180px] truncate text-right font-mono text-[10px] text-[#C58B92]/60"
-                  >
-                    {{ paymentReference }}
-                  </span>
+                    <span
+                      class="text-right text-xs text-[#F1E8E3]/70"
+                    >
+                      {{ selectedReading?.name }}
+                    </span>
+                  </div>
+
+                  <div class="mt-3 flex justify-between gap-4">
+                    <span class="text-xs text-[#C58B92]/45">
+                      Amount
+                    </span>
+
+                    <span
+                      class="text-right text-xs text-[#C8A77A]/75"
+                    >
+                      {{ formatPrice(selectedReading?.price ?? 0) }}
+                    </span>
+                  </div>
+
+                  <div class="mt-3 flex justify-between gap-4">
+                    <span class="text-xs text-[#C58B92]/45">
+                      Reference
+                    </span>
+
+                    <span
+                      class="max-w-[180px] truncate text-right font-mono text-[10px] text-[#C58B92]/60"
+                    >
+                      {{ paymentReference }}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              <p
+                class="mx-auto mt-6 max-w-sm text-[10px] leading-5 text-[#C58B92]/35"
+              >
+                Please keep your transfer receipt until your payment
+                has been confirmed.
+              </p>
 
               <Button
                 class="mt-8 rounded-full bg-[#F1E8E3] px-7 text-[#1D0C13] transition hover:bg-white"
@@ -1064,7 +1374,8 @@ watch(
             v-if="step !== 'confirmed'"
             class="relative z-10 flex shrink-0 flex-col-reverse gap-3 border-t border-[#C58B92]/10 bg-[#160B10]/65 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
           >
-            <!-- Back -->
+            <!-- Back / helper -->
+
             <Button
               v-if="step !== 'readings'"
               type="button"
@@ -1077,7 +1388,6 @@ watch(
               Back
             </Button>
 
-            <!-- Reading helper -->
             <div
               v-else
               class="flex items-center gap-2 text-[9px] uppercase tracking-[0.15em] text-[#C58B92]/35"
@@ -1087,6 +1397,7 @@ watch(
             </div>
 
             <!-- Continue -->
+
             <Button
               v-if="step === 'readings'"
               type="button"
@@ -1100,6 +1411,7 @@ watch(
             </Button>
 
             <!-- Review -->
+
             <Button
               v-else-if="step === 'details'"
               type="button"
@@ -1107,18 +1419,19 @@ watch(
               :disabled="!detailsValid"
               @click="continueToPayment"
             >
-              Review payment
+              Review transfer
 
               <ArrowRight class="ml-2 h-3.5 w-3.5" />
             </Button>
 
-            <!-- Pay -->
+            <!-- Confirm transfer -->
+
             <Button
               v-else-if="step === 'payment'"
               type="button"
               class="rounded-full bg-[#6B0F1A] px-6 text-xs text-[#F1E8E3] shadow-[0_10px_30px_rgba(107,15,26,0.25)] transition hover:bg-[#7E3541] hover:shadow-[0_14px_35px_rgba(107,15,26,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="loading"
-              @click="initializePayment"
+              @click="confirmTransfer"
             >
               <LoaderCircle
                 v-if="loading"
@@ -1126,12 +1439,11 @@ watch(
               />
 
               <span v-if="loading">
-                Connecting to Paystack...
+                Sending booking...
               </span>
 
               <span v-else>
-                Pay
-                {{ formatPrice(selectedReading?.price ?? 0) }}
+                I've made the transfer
               </span>
 
               <ArrowRight

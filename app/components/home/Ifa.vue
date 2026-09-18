@@ -4,6 +4,14 @@ import {
   Check,
   Sparkles,
 } from "lucide-vue-next";
+import { ref } from "vue";
+import ConsultationDialog from "@/components/consultation/ConsultationDialog.vue";
+
+
+const consultationOpen = ref(false);
+const openConsultation = () => {
+  consultationOpen.value = true;
+};
 
 const consultationPoints = [
   "Relationships & important personal decisions",
@@ -389,16 +397,19 @@ const scrollToBooking = () => {
           <div class="mt-10 flex flex-wrap items-center gap-5">
             <Button
               type="button"
-              @click="scrollToBooking"
+              @click="openConsultation"
               class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_12px_36px_rgba(107,15,26,0.24)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/55 hover:bg-[#7E3541] hover:shadow-[0_16px_45px_rgba(107,15,26,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
             >
-              Book an Ifá Consultation
+              Book an Ifá or Afa Consultation
 
               <ArrowUpRight
                 class="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </Button>
 
+            <ConsultationDialog
+              v-model:open="consultationOpen"
+            />
             <span
               class="max-w-[170px] text-[9px] uppercase leading-4 tracking-[0.16em] text-[#F1E8E3]/20"
             >

@@ -33,7 +33,7 @@ const navigation = [
     href: "#products",
   },
   {
-    label: "Ifa & Ifa Consultation",
+    label: "Ifa & Afa Consultation",
     href: "#ifa",
   },
 ];
