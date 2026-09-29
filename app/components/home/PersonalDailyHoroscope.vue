@@ -312,6 +312,8 @@ const resetReading = () => {
   error.value = "";
 };
 
+
+
 const validateForm = () => {
   const year = Number(form.value.year);
   const month = Number(form.value.month);
@@ -901,10 +903,6 @@ const scrollToForm = () => {
           </p>
         </div>
       </div>
-
-      <!-- =======================================================
-           RESULTS
-      ======================================================== -->
 
       <div
         v-if="showResults"

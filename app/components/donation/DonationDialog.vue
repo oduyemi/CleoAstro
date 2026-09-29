@@ -28,9 +28,9 @@ const copied = ref(false);
 const submitting = ref(false);
 
 const bankDetails = {
-  bankName: "YOUR BANK NAME",
-  accountName: "CLEO ASTRO",
-  accountNumber: "0000000000",
+  bankName: "PalmPay",
+  accountName: "CLEOASTRO(Samuel)",
+  accountNumber: "8995618317",
 };
 
 const formattedAmount = computed(() => {

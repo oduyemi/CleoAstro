@@ -90,9 +90,9 @@ const consultations: ConsultationOption[] = [
  */
 
 const bankDetails = {
-  bankName: "YOUR BANK NAME",
-  accountName: "CLEO ASTRO",
-  accountNumber: "0000000000",
+  bankName: "PalmPay",
+  accountName: "CLEOASTRO(Samuel)",
+  accountNumber: "8995618317",
 };
 
 /*

@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero.vue";
 import About from "@/components/home/About.vue";
 import Readings from "@/components/home/PersonalDailyHoroscope.vue";
 import PersonalDailyHoroscope from "@/components/home/Readings.vue";
+import MoonNow from "@/components/home/MoonNow.vue";
 import Products from "@/components/home/Products.vue";
 import Ifa from "@/components/home/Ifa.vue";
 import Donations from "@/components/home/Donations.vue";
@@ -12,6 +13,7 @@ import Donations from "@/components/home/Donations.vue";
   <main class="min-h-screen overflow-hidden bg-[#090711] text-white selection:bg-amber-300 selection:text-black">
     <Hero />
     <About />
+    <MoonNow />
     <PersonalDailyHoroscope />
     <Readings />
     <Products />

@@ -138,47 +138,6 @@ onBeforeUnmount(() => {
       <div class="celestial-grain absolute inset-0" />
     </div>
 
-    <!-- =====================================================
-         TOP BRAND
-    ====================================================== -->
-
-    <div
-      class="absolute left-5 top-6 z-40 sm:left-8 sm:top-8 lg:left-12 xl:left-16"
-    >
-      <div
-        class="hero-brand flex items-center gap-3"
-        :class="{ 'hero-visible': isReady }"
-      >
-        <div class="brand-symbol relative flex h-10 w-10 items-center justify-center rounded-full border border-[#C58B92]/20 bg-[#1D0C13]/60">
-          <Orbit
-            class="h-[17px] w-[17px] text-[#C8A77A]/80"
-            stroke-width="1"
-          />
-
-          <span
-            class="absolute inset-[5px] rounded-full border border-[#C58B92]/10"
-          />
-
-          <span
-            class="absolute -right-1 top-1 h-1 w-1 rounded-full bg-[#C8A77A]/70"
-          />
-        </div>
-
-        <div>
-          <p
-            class="text-[9px] font-medium uppercase tracking-[0.34em] text-[#F1E8E3]/80"
-          >
-            Cleo Astro
-          </p>
-
-          <p
-            class="mt-1 text-[7px] uppercase tracking-[0.25em] text-[#C58B92]/50"
-          >
-            Vedic Astrology
-          </p>
-        </div>
-      </div>
-    </div>
 
     <!-- =====================================================
          LIVE SKY INDICATOR
