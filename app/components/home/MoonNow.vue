@@ -419,7 +419,7 @@ const locationName = computed(
   <section
     id="moon"
     ref="moonSection"
-    class="relative overflow-hidden bg-[#160B10] py-24 text-[#F1E8E3] sm:py-32 lg:py-40"
+    class="relative overflow-hidden bg-transparent py-24 text-[#F1E8E3] sm:py-32 lg:py-40"
   >
     <!-- ======================================================
          LIGHTWEIGHT BACKGROUND
@@ -430,7 +430,7 @@ const locationName = computed(
       class="pointer-events-none absolute inset-0"
     >
       <div
-        class="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(107,15,26,0.14),transparent_38%),linear-gradient(180deg,#160B10_0%,#1A0B11_50%,#160B10_100%)]"
+        class="absolute inset-0 bg-transparent"
       />
 
       <div
