@@ -68,7 +68,7 @@ const reducedOrNormal = (
 
     <div
       aria-hidden="true"
-      class="pointer-events-none absolute inset-0"
+      class="pointer-events-none absolute inset-0 bg-[#42141F]/50"
     >
       <!-- Main background -->
       <div
@@ -639,18 +639,7 @@ const reducedOrNormal = (
 <style scoped>
 .hero-section {
   position: relative;
-}
-
-.hero-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: transparent;
-}
-
-:global(#__nuxt::before) {
-  display: none;
+  background: #160b10;
 }
 </style>
+
