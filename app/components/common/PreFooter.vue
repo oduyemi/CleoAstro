@@ -12,22 +12,12 @@ const openBooking = () => {
 
 <template>
   <section
-    class="relative isolate overflow-hidden border-t border-[#C58B92]/[0.08] bg-[#160B10] py-24 text-[#F1E8E3] sm:py-32 lg:py-40"
+    class="relative isolate overflow-hidden border-t border-[#C58B92]/[0.08] bg-transparent py-24 text-[#F1E8E3] sm:py-32 lg:py-40"
   >
-    <!-- =========================================================
-         OPAQUE CANVAS
-         Intentionally prevents global bg_img.png from showing.
-    ========================================================== -->
-
     <div
       aria-hidden="true"
-      class="pointer-events-none absolute inset-0 -z-20 bg-[#160B10]"
+      class="pointer-events-none absolute inset-0 -z-20 bg-transparent"
     />
-
-    <!-- =========================================================
-         ATMOSPHERE
-    ========================================================== -->
-
     <div
       aria-hidden="true"
       class="pointer-events-none absolute left-1/2 top-[48%] -z-10 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#6B0F1A]/[0.13] blur-[150px]"

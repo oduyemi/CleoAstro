@@ -41,16 +41,11 @@ const causes = [
 <template>
   <section
     id="donations"
-    class="relative isolate overflow-hidden bg-[#160B10] text-[#F1E8E3]"
+    class="relative isolate overflow-hidden bg-transparent text-[#F1E8E3]"
   >
-    <!-- ========================================================= -->
-    <!-- OPAQUE CANVAS -->
-    <!-- Keeps the global bg_img.png from bleeding into this section -->
-    <!-- ========================================================= -->
-
     <div
       aria-hidden="true"
-      class="pointer-events-none absolute inset-0 -z-30 bg-[#160B10]"
+      class="pointer-events-none absolute inset-0 -z-30 bg-transparent"
     />
 
     <!-- ========================================================= -->
