@@ -60,7 +60,7 @@ const reducedOrNormal = (
 
 <template>
   <section
-    class="relative isolate min-h-[100svh] overflow-hidden bg-[#160B10] text-[#F1E8E3]"
+    class="hero-section relative isolate min-h-[100svh] overflow-hidden bg-transparent text-[#F1E8E3]"
   >
     <!-- =====================================================
          STATIC BACKGROUND
@@ -72,7 +72,7 @@ const reducedOrNormal = (
     >
       <!-- Main background -->
       <div
-        class="absolute inset-0 bg-[linear-gradient(115deg,#160B10_0%,#1B0B12_45%,#160B10_100%)]"
+        class="absolute inset-0 bg-transparent"
       />
 
       <!-- Static atmospheric fields.
@@ -635,3 +635,22 @@ const reducedOrNormal = (
     />
   </section>
 </template>
+
+<style scoped>
+.hero-section {
+  position: relative;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+}
+
+:global(#__nuxt::before) {
+  display: none;
+}
+</style>
