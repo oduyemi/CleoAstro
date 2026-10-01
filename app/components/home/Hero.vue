@@ -1,19 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import {
-  ArrowUpRight,
-  Moon,
-} from "lucide-vue-next";
-import {
-  motion,
-  useReducedMotion,
-} from "motion-v";
-import type { Variant } from "motion-v";
-
+import { ArrowUpRight, Moon } from "lucide-vue-next";
+import { motion, useReducedMotion } from "motion-v";
 import BookAReadingDialog from "@/components/booking/BookAReadingDialog.vue";
 
 const bookingOpen = ref(false);
-
 const prefersReducedMotion = useReducedMotion();
 
 const openBooking = () => {
@@ -22,11 +13,9 @@ const openBooking = () => {
 
 const readTheSky = () => {
   if (!import.meta.client) return;
-
   const target =
     document.querySelector("#personal-horoscope") ||
     document.querySelector("#planetary-updates");
-
   target?.scrollIntoView({
     behavior: prefersReducedMotion.value ? "auto" : "smooth",
     block: "start",
@@ -43,7 +32,16 @@ const slowEnterTransition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
-const reducedOrNormal = (value: Variant): Variant => {
+type RevealValues = {
+  opacity?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+};
+
+const reducedOrNormal = (
+  value: RevealValues
+): RevealValues => {
   if (prefersReducedMotion.value) {
     return {
       opacity: 1,
@@ -53,7 +51,10 @@ const reducedOrNormal = (value: Variant): Variant => {
     };
   }
 
-  return value;
+  return {
+    opacity: 0,
+    ...value,
+  };
 };
 </script>
 
