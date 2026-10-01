@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { ArrowRight } from "lucide-vue-next";
-import { motion, useReducedMotion } from "motion-v";
+import { ref } from "vue";
+import {
+  ArrowRight,
+  Sparkles,
+} from "lucide-vue-next";
+import {
+  motion,
+  useReducedMotion,
+} from "motion-v";
+
 import { Button } from "@/components/ui/button";
 import BookAReadingDialog from "@/components/booking/BookAReadingDialog.vue";
 
@@ -21,328 +29,246 @@ const handleReadingSelection = (reading: {
   console.log("Selected reading:", reading);
 };
 
-const noMotion = {};
+/*
+|--------------------------------------------------------------------------
+| Motion
+|--------------------------------------------------------------------------
+| Deliberately limited to transform + opacity.
+| No continuous animation.
+*/
 
-const sectionContainer = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.13,
-      delayChildren: 0.08,
-    },
-  },
+const revealTransition = {
+  duration: 0.7,
+  ease: [0.22, 1, 0.36, 1],
 };
 
-const sectionItem = {
-  hidden: {
-    opacity: 0,
-    y: 22,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.9,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
+const portraitTransition = {
+  duration: 0.9,
+  ease: [0.22, 1, 0.36, 1],
 };
 
-const imageEntrance = {
-  hidden: {
-    opacity: 0,
-    scale: 0.965,
-    x: -24,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    x: 0,
-    transition: {
-      duration: 1.15,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
-
-const orbitAnimation = {
-  rotate: 360,
-};
-
-const dustParticles = Array.from({ length: 42 }, (_, index) => {
-  const seed = (index * 9301 + 49297) % 233280;
-  const random = seed / 233280;
-
-  const seed2 = (index * 49297 + 12345) % 233280;
-  const random2 = seed2 / 233280;
+const getReveal = (
+  values: Record<string, number>
+) => {
+  if (prefersReducedMotion.value) {
+    return {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      scale: 1,
+    };
+  }
 
   return {
-    id: index,
-    x: random * 100,
-    y: random2 * 100,
-    size: random > 0.88 ? 1.4 : 0.7,
-    opacity: random > 0.88 ? 0.3 : 0.12,
-    duration: 18 + random * 20,
-    delay: -(random2 * 20),
+    opacity: 0,
+    ...values,
   };
-});
+};
 </script>
 
 <template>
   <section
     id="about"
-    class="relative isolate overflow-hidden border-t border-[#C58B92]/[0.06] bg-transparent py-24 sm:py-28 lg:py-32"
+    class="relative isolate overflow-hidden border-t border-[#C58B92]/[0.06] bg-transparent py-24 text-[#F1E8E3] sm:py-28 lg:py-32"
   >
     <!-- =====================================================
-         READABILITY FIELD
-         ===================================================== -->
+         STATIC ATMOSPHERE
+         ====================================================== -->
 
     <div
-      class="pointer-events-none absolute inset-y-0 right-0 z-[1] w-full lg:w-[62%]"
       aria-hidden="true"
-    >
-      <!-- Softened echo of the global celestial artwork -->
-      <div
-        class="absolute inset-[-12%]"
-        style="
-          background-image: url('/images/bg_img.png');
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: min(720px, 85vw) auto;
-          filter: blur(24px);
-          opacity: 0.13;
-          transform: scale(1.08);
-        "
-      />
-
-      <!-- Wine atmospheric veil -->
-      <div
-        class="absolute inset-0 bg-gradient-to-r
-          from-[#160B10]/0
-          via-[#160B10]/48
-          to-[#160B10]/76"
-      />
-
-      <!-- Localized reading field -->
-      <div
-        class="absolute inset-[8%_4%]
-          rounded-[50%]
-          bg-[#261018]/28
-          blur-[70px]"
-      />
-    </div>
-
-    <!-- =====================================================
-         ATMOSPHERE
-         ===================================================== -->
-
-    <div
       class="pointer-events-none absolute inset-0"
-      aria-hidden="true"
     >
-      <!-- Left burgundy atmosphere -->
-      <motion.div
-        class="absolute left-[8%] top-[18%] h-[420px] w-[420px] rounded-full bg-[#6B0F1A]/[0.12] blur-[150px]"
-        :animate="
-          prefersReducedMotion
-            ? noMotion
-            : {
-                x: [0, 20, 0, -15, 0],
-                y: [0, 18, 0, -12, 0],
-                opacity: [0.3, 0.46, 0.3, 0.4, 0.3],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 28,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }
-        "
+      <!-- Base atmosphere -->
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_78%_42%,rgba(107,15,26,.16),transparent_31%),radial-gradient(circle_at_14%_72%,rgba(126,53,65,.07),transparent_28%)]"
       />
 
-      <!-- Right soft rose atmosphere -->
-      <motion.div
-        class="absolute bottom-[4%] right-[4%] h-[460px] w-[460px] rounded-full bg-[#7E3541]/[0.08] blur-[170px]"
-        :animate="
-          prefersReducedMotion
-            ? noMotion
-            : {
-                x: [0, -18, 0, 15, 0],
-                y: [0, -15, 0, 18, 0],
-                opacity: [0.18, 0.3, 0.18, 0.26, 0.18],
-              }
-        "
-        :transition="
-          prefersReducedMotion
-            ? {}
-            : {
-                duration: 34,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }
-        "
+      <!-- Right visual field -->
+      <div
+        class="absolute right-[-8%] top-[12%] h-[620px] w-[620px] rounded-full bg-[#6B0F1A]/[0.06]"
       />
 
-      <!-- Fine dust -->
-      <div class="absolute inset-0 overflow-hidden">
-        <span
-          v-for="particle in dustParticles"
-          :key="particle.id"
-          class="absolute rounded-full bg-[#C58B92]"
-          :style="{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            opacity: particle.opacity,
-            '--dust-duration': `${particle.duration}s`,
-            '--dust-delay': `${particle.delay}s`,
-          }"
-          :class="
-            prefersReducedMotion
-              ? ''
-              : 'animate-[aboutDust_var(--dust-duration)_ease-in-out_var(--dust-delay)_infinite_alternate]'
-          "
-        />
-      </div>
+      <!-- Bottom atmosphere -->
+      <div
+        class="absolute bottom-[-20%] left-[20%] h-[500px] w-[700px] rounded-full bg-[#42141F]/[0.08]"
+      />
+
+      <!-- Editorial horizon -->
+      <div
+        class="absolute left-[5%] right-[5%] top-[58%] h-px bg-gradient-to-r from-transparent via-[#C8A77A]/[0.08] to-transparent"
+      />
+
+      <!-- Static stars -->
+      <span
+        class="absolute left-[9%] top-[18%] h-1 w-1 rounded-full bg-[#F1E8E3]/20"
+      />
+
+      <span
+        class="absolute left-[25%] top-[11%] h-0.5 w-0.5 rounded-full bg-[#C8A77A]/30"
+      />
+
+      <span
+        class="absolute left-[46%] top-[21%] h-1 w-1 rounded-full bg-[#F1E8E3]/15"
+      />
+
+      <span
+        class="absolute right-[18%] top-[16%] h-1 w-1 rounded-full bg-[#C58B92]/20"
+      />
+
+      <span
+        class="absolute right-[7%] top-[43%] h-0.5 w-0.5 rounded-full bg-[#F1E8E3]/20"
+      />
+
+      <span
+        class="absolute left-[15%] bottom-[22%] h-0.5 w-0.5 rounded-full bg-[#C8A77A]/20"
+      />
+
+      <span
+        class="absolute right-[31%] bottom-[16%] h-1 w-1 rounded-full bg-[#C58B92]/15"
+      />
     </div>
 
     <!-- =====================================================
-         MAIN COMPOSITION
-         ===================================================== -->
+         MAIN CONTENT
+         ====================================================== -->
 
-    <motion.div
-      class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8"
-      :variants="sectionContainer"
-      initial="hidden"
-      whileInView="visible"
-      :viewport="{ once: true, amount: 0.16 }"
+    <div
+      class="relative z-10 mx-auto max-w-[1380px] px-5 sm:px-8 lg:px-12 xl:px-16"
     >
       <div
-        class="grid items-center gap-16 lg:grid-cols-[0.88fr_1.12fr] lg:gap-20 xl:grid-cols-[0.9fr_1.1fr] xl:gap-24"
+        class="grid items-center gap-16 lg:grid-cols-[0.82fr_1.18fr] lg:gap-20 xl:grid-cols-[0.86fr_1.14fr] xl:gap-24"
       >
         <!-- =================================================
-             IMAGE / CELESTIAL PORTRAIT
-             ================================================= -->
+             PORTRAIT
+             ================================================== -->
 
         <motion.div
-          class="relative mx-auto w-full max-w-[510px] lg:mx-0"
-          :variants="imageEntrance"
+          class="relative mx-auto w-full max-w-[500px] lg:mx-0"
+          :initial="
+            getReveal({
+              x: -28,
+              scale: 0.985,
+            })
+          "
+          :whileInView="{
+            opacity: 1,
+            x: 0,
+            scale: 1,
+          }"
+          :viewport="{
+            once: true,
+            amount: 0.2,
+          }"
+          :transition="portraitTransition"
         >
-          <!-- Editorial vertical label -->
+          <!-- Vertical editorial label -->
           <div
-            class="absolute -left-9 top-1/2 hidden -translate-y-1/2 -rotate-90 items-center gap-3 xl:flex"
+            class="absolute -left-10 top-1/2 hidden -translate-y-1/2 -rotate-90 items-center gap-3 xl:flex"
           >
             <span
-              class="text-[8px] font-medium uppercase tracking-[0.42em] text-[#C58B92]/45"
+              class="text-[8px] font-medium uppercase tracking-[0.42em] text-[#C58B92]/40"
             >
               About Sammy
             </span>
 
-            <span class="h-px w-12 bg-[#C58B92]/20" />
+            <span
+              class="h-px w-12 bg-[#C58B92]/20"
+            />
           </div>
 
-          <!-- Outer celestial construction -->
+          <!-- Outer frame -->
           <div
-            class="absolute -inset-8 hidden rounded-[48px] border border-[#C58B92]/[0.07] sm:block"
+            class="absolute -inset-6 hidden rounded-[42px] border border-[#C58B92]/[0.055] sm:block"
           />
 
           <div
-            class="absolute -inset-5 rounded-[40px] border border-[#C58B92]/[0.09]"
+            class="absolute -inset-3 rounded-[36px] border border-[#C58B92]/[0.08]"
           />
 
-          <!-- Rotating orbital mark -->
-          <motion.div
-            class="absolute -right-8 -top-8 z-20 hidden h-20 w-20 rounded-full border border-[#C58B92]/20 sm:block"
-            :animate="
-              prefersReducedMotion
-                ? noMotion
-                : orbitAnimation
-            "
-            :transition="
-              prefersReducedMotion
-                ? {}
-                : {
-                    duration: 40,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }
-            "
+          <!-- Small orbital detail
+               STATIC — no infinite rotation -->
+          <div
+            class="absolute -right-5 -top-5 z-20 hidden h-16 w-16 rounded-full border border-[#C58B92]/20 bg-[#160B10] sm:block"
           >
             <span
-              class="absolute left-1/2 top-[-2px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#C58B92] shadow-[0_0_12px_rgba(197,139,146,0.65)]"
+              class="absolute left-1/2 top-[-2px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#C8A77A]"
             />
-          </motion.div>
 
-          <!-- Image -->
+            <span
+              class="absolute bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#C58B92]/60"
+            />
+          </div>
+
+          <!-- Image frame -->
           <div
-            class="relative overflow-hidden rounded-[30px] border border-[#C58B92]/[0.14] bg-[#1D0C13] p-1.5 shadow-[0_35px_100px_rgba(0,0,0,0.42)]"
+            class="relative rounded-[30px] border border-[#C58B92]/[0.13] bg-[#1B0B12] p-1.5"
           >
-            <motion.div
+            <div
               class="relative overflow-hidden rounded-[24px]"
-              :whileHover="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      scale: 1.012,
-                    }
-              "
-              :transition="{
-                duration: 0.8,
-                ease: [0.22, 1, 0.36, 1],
-              }"
             >
               <img
                 src="/images/reading.jpeg"
                 alt="Sammy during a spiritual astrology reading"
+                width="800"
+                height="1000"
+                loading="lazy"
+                decoding="async"
+                draggable="false"
                 class="aspect-[4/5] w-full object-cover"
               />
 
-              <!-- Subtle wine atmospheric veil -->
+              <!-- Image tint -->
               <div
-                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#160B10]/70 via-transparent to-[#42141F]/10"
+                class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#160B10]/75 via-transparent to-[#42141F]/10"
               />
 
-              <!-- Fine inner frame -->
+              <!-- Inner frame -->
               <div
                 class="pointer-events-none absolute inset-3 rounded-[19px] border border-[#F1E8E3]/[0.07]"
               />
-            </motion.div>
+
+              <!-- Image corner marker -->
+              <div
+                class="absolute bottom-5 left-5 flex items-center gap-2"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full bg-[#C8A77A]"
+                />
+
+                <span
+                  class="text-[7px] uppercase tracking-[0.3em] text-[#F1E8E3]/45"
+                >
+                  Vedic astrology
+                </span>
+              </div>
+            </div>
           </div>
 
-          <!-- Bottom editorial annotation -->
-          <motion.div
-            class="absolute -bottom-7 left-5 z-20 sm:left-8"
-            :animate="
-              prefersReducedMotion
-                ? noMotion
-                : {
-                    y: [0, -4, 0],
-                  }
-            "
-            :transition="
-              prefersReducedMotion
-                ? {}
-                : {
-                    duration: 7,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }
-            "
+          <!-- =================================================
+               INTENTION CARD
+               ================================================== -->
+
+          <div
+            class="absolute -bottom-8 left-4 z-20 sm:left-7"
           >
-            <div class="flex items-center gap-3">
+            <div
+              class="flex items-center gap-3 rounded-2xl border border-[#C58B92]/15 bg-[#1D0C13] px-4 py-3"
+            >
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-full border border-[#C58B92]/20 bg-[#1D0C13]/90 backdrop-blur-md"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C58B92]/15"
               >
-                <Sparkles class="h-3.5 w-3.5 text-[#C8A77A]/75" />
+                <Sparkles
+                  class="h-3.5 w-3.5 text-[#C8A77A]/70"
+                  stroke-width="1.2"
+                />
               </div>
 
-              <div class="border-l border-[#C58B92]/20 pl-3">
+              <div
+                class="border-l border-[#C58B92]/15 pl-3"
+              >
                 <p
-                  class="text-[7px] uppercase tracking-[0.3em] text-[#C58B92]/45"
+                  class="text-[7px] uppercase tracking-[0.28em] text-[#C58B92]/40"
                 >
                   The intention
                 </p>
@@ -354,16 +280,18 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          <!-- Coordinate ticks -->
+          <!-- Coordinates -->
           <div
-            class="absolute -bottom-10 right-8 hidden items-center gap-2 sm:flex"
+            class="absolute -bottom-8 right-3 hidden items-center gap-2 sm:flex"
           >
-            <span class="h-px w-5 bg-[#C58B92]/20" />
+            <span
+              class="h-px w-5 bg-[#C58B92]/20"
+            />
 
             <span
-              class="font-mono text-[7px] tracking-[0.18em] text-[#C58B92]/35"
+              class="font-mono text-[7px] tracking-[0.16em] text-[#C58B92]/30"
             >
               06° 18′ N
             </span>
@@ -372,24 +300,44 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
 
         <!-- =================================================
              CONTENT
-             ================================================= -->
+             ================================================== -->
 
         <motion.div
-          class="relative max-w-2xl"
-          :variants="sectionItem"
+          class="relative max-w-[680px]"
+          :initial="
+            getReveal({
+              y: 24,
+            })
+          "
+          :whileInView="{
+            opacity: 1,
+            y: 0,
+          }"
+          :viewport="{
+            once: true,
+            amount: 0.16,
+          }"
+          :transition="{
+            ...revealTransition,
+            delay: prefersReducedMotion ? 0 : 0.08,
+          }"
         >
-          <!-- Section index -->
-          <div class="flex items-center gap-4">
+          <!-- Section label -->
+          <div
+            class="flex items-center gap-4"
+          >
             <span
-              class="font-mono text-[9px] tracking-[0.28em] text-[#C58B92]/55"
+              class="font-mono text-[9px] tracking-[0.28em] text-[#C58B92]/50"
             >
               01
             </span>
 
-            <span class="h-px w-10 bg-[#C58B92]/20" />
+            <span
+              class="h-px w-10 bg-[#C58B92]/20"
+            />
 
             <span
-              class="text-[8px] font-medium uppercase tracking-[0.34em] text-[#C58B92]/50"
+              class="text-[8px] font-medium uppercase tracking-[0.34em] text-[#C58B92]/45"
             >
               The person behind the reading
             </span>
@@ -397,7 +345,7 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
 
           <!-- Heading -->
           <h2
-            class="mt-7 max-w-2xl font-serif text-[2.8rem] font-medium leading-[1.04] tracking-[-0.04em] text-[#F1E8E3] sm:text-5xl lg:text-[57px]"
+            class="mt-7 max-w-[650px] font-serif text-[clamp(2.7rem,5vw,4.2rem)] font-medium leading-[0.98] tracking-[-0.045em] text-[#F1E8E3]"
           >
             You don't have to
             <span class="text-[#C58B92]/80">
@@ -407,66 +355,66 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
 
           <!-- Intro -->
           <p
-            class="mt-7 font-serif text-xl leading-8 text-[#F1E8E3]/80 sm:text-[22px] sm:leading-9"
+            class="mt-7 font-serif text-xl leading-8 text-[#F1E8E3]/75 sm:text-[22px]"
           >
             Hi, I'm Okechukwu.
           </p>
 
+          <!-- Body -->
           <div
-            class="mt-6 space-y-5 text-[15px] leading-7 text-[#F1E8E3]/[0.64] sm:text-base sm:leading-8"
+            class="mt-6 max-w-[620px] space-y-5 text-[15px] leading-7 text-[#F1E8E3]/[0.62] sm:text-base sm:leading-8"
           >
             <p>
-              I believe there are moments in life when we simply need to
-              pause. To step away from the noise, ask the questions we've
-              been carrying, and make sense of what we are experiencing.
+              I believe there are moments in life when we simply
+              need to pause. To step away from the noise, ask the
+              questions we've been carrying, and make sense of
+              what we are experiencing.
             </p>
 
             <p>
-              Maybe you're trying to understand a relationship. Maybe you're
-              standing at a crossroads. Maybe something keeps repeating in
-              your life and you're beginning to wonder why.
+              Maybe you're trying to understand a relationship.
+              Maybe you're standing at a crossroads. Maybe
+              something keeps repeating in your life and you're
+              beginning to wonder why.
             </p>
 
             <p>
-              That's where my work begins. Through Vedic astrology and
-              intuitive readings, we explore the patterns beneath the surface
-              — including ancestral influences, karmic themes, relationships,
-              purpose, and the energies surrounding you.
+              That's where my work begins. Through Vedic astrology
+              and intuitive readings, we explore the patterns
+              beneath the surface — including ancestral influences,
+              karmic themes, relationships, purpose, and the
+              energies surrounding you.
             </p>
           </div>
 
           <!-- =================================================
-               QUOTE / PHILOSOPHY
-               ================================================= -->
+               PHILOSOPHY
+               ================================================== -->
 
-          <motion.div
-            class="relative mt-9 border-y border-[#C58B92]/[0.13] py-6 sm:py-7"
-            :whileHover="
-              prefersReducedMotion
-                ? {}
-                : {
-                    borderColor: 'rgba(197,139,146,0.22)',
-                  }
-            "
-            :transition="{ duration: 0.5 }"
+          <div
+            class="relative mt-9 border-y border-[#C58B92]/[0.12] py-7"
           >
-            <!-- Large quotation mark -->
             <span
-              class="absolute -left-1 -top-5 font-serif text-5xl font-light leading-none text-[#C58B92]/15"
               aria-hidden="true"
+              class="absolute -left-1 -top-5 font-serif text-5xl font-light leading-none text-[#C58B92]/15"
             >
               “
             </span>
 
             <p
-              class="max-w-xl font-serif text-xl leading-8 text-[#F1E8E3]/72 sm:text-[21px] sm:leading-9"
+              class="max-w-[590px] font-serif text-lg leading-8 text-[#F1E8E3]/70 sm:text-xl sm:leading-9"
             >
-              I don't want to tell you who you are or what your life should
-              become. I want to help you see yourself a little more clearly.
+              I don't want to tell you who you are or what your
+              life should become. I want to help you see yourself
+              a little more clearly.
             </p>
 
-            <div class="mt-5 flex items-center gap-3">
-              <span class="h-px w-8 bg-[#C58B92]/30" />
+            <div
+              class="mt-5 flex items-center gap-3"
+            >
+              <span
+                class="h-px w-8 bg-[#C58B92]/30"
+              />
 
               <span
                 class="text-[8px] uppercase tracking-[0.28em] text-[#C58B92]/45"
@@ -474,11 +422,11 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
                 Sammy
               </span>
             </div>
-          </motion.div>
+          </div>
 
           <!-- =================================================
-               FOOTER / CTA
-               ================================================= -->
+               CTA AREA
+               ================================================== -->
 
           <div
             class="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
@@ -497,49 +445,41 @@ const dustParticles = Array.from({ length: 42 }, (_, index) => {
               </p>
             </div>
 
-            <motion.div
-              :whileHover="
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      x: 4,
-                    }
-              "
-              :transition="{ duration: 0.3 }"
+            <Button
+              type="button"
+              class="group h-12 shrink-0 rounded-full border border-[#C8A77A]/30 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_10px_30px_rgba(107,15,26,0.18)] transition-[transform,background-color,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#C8A77A]/50 hover:bg-[#7E3541] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
+              @click="openBooking"
             >
-              <Button
-                variant="ghost"
-                class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_12px_36px_rgba(107,15,26,0.24)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/55 hover:bg-[#7E3541] hover:shadow-[0_16px_45px_rgba(107,15,26,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
-                @click="openBooking"
-              >
-                <span>Book a Reading</span>
+              <span>
+                Book a Reading
+              </span>
 
-                <ArrowRight
-                  class="ml-3 h-4 w-4 text-[#C8A77A]/75 transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </Button>
-            </motion.div>
+              <ArrowRight
+                class="ml-3 h-4 w-4 text-[#C8A77A]/75 transition-transform duration-300 group-hover:translate-x-1"
+                stroke-width="1.5"
+              />
+            </Button>
           </div>
         </motion.div>
       </div>
-    </motion.div>
+    </div>
 
     <!-- =====================================================
-         BOTTOM FADE
-         ===================================================== -->
+         BOTTOM TRANSITION
+         ====================================================== -->
 
     <div
-      class="pointer-events-none absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#160B10]/90 via-[#160B10]/35 to-transparent"
       aria-hidden="true"
+      class="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#160B10] to-transparent"
     />
   </section>
 
   <BookAReadingDialog
+    v-if="bookingOpen"
     v-model:open="bookingOpen"
     @select="handleReadingSelection"
   />
 </template>
-
 <style scoped>
 @keyframes aboutDust {
   0% {

@@ -1,4 +1,8 @@
-import { createError, defineEventHandler, getQuery } from "h3";
+import {
+  createError,
+  defineEventHandler,
+  getQuery,
+} from "h3";
 
 interface FreeAstroMoonPhase {
   name: string;
@@ -93,6 +97,27 @@ const LAGOS_LATITUDE = 6.5244;
 const LAGOS_LONGITUDE = 3.3792;
 const LAGOS_TIMEZONE = "Africa/Lagos";
 
+/*
+ * Keep the external API result in server memory.
+ *
+ * This prevents every browser request from immediately
+ * becoming another FreeAstroAPI request.
+ */
+let moonCache:
+  | {
+      expiresAt: number;
+      data: unknown;
+    }
+  | null = null;
+
+/*
+ * Five minutes is more than enough for this UI.
+ *
+ * The Moon moves continuously, but recalculating the
+ * entire lunar dataset every few seconds is unnecessary.
+ */
+const CACHE_TTL = 5 * 60 * 1000;
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const query = getQuery(event);
@@ -100,12 +125,18 @@ export default defineEventHandler(async (event) => {
   if (!config.freeAstroApiKey) {
     throw createError({
       statusCode: 500,
-      statusMessage: "FreeAstroAPI key is not configured.",
+      statusMessage:
+        "FreeAstroAPI key is not configured.",
     });
   }
 
-  const latitude = Number(query.lat ?? LAGOS_LATITUDE);
-  const longitude = Number(query.lon ?? LAGOS_LONGITUDE);
+  const latitude = Number(
+    query.lat ?? LAGOS_LATITUDE,
+  );
+
+  const longitude = Number(
+    query.lon ?? LAGOS_LONGITUDE,
+  );
 
   if (
     !Number.isFinite(latitude) ||
@@ -113,13 +144,29 @@ export default defineEventHandler(async (event) => {
   ) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Invalid latitude or longitude.",
+      statusMessage:
+        "Invalid latitude or longitude.",
     });
   }
 
   /*
    * ---------------------------------------------------------
-   * Current timestamp
+   * CACHE
+   * ---------------------------------------------------------
+   */
+
+  const nowMs = Date.now();
+
+  if (
+    moonCache &&
+    moonCache.expiresAt > nowMs
+  ) {
+    return moonCache.data;
+  }
+
+  /*
+   * ---------------------------------------------------------
+   * CURRENT TIMESTAMP
    * ---------------------------------------------------------
    */
 
@@ -127,14 +174,7 @@ export default defineEventHandler(async (event) => {
 
   /*
    * ---------------------------------------------------------
-   * 1. Moon Phase
-   *
-   * Used for:
-   * - phase name
-   * - illumination
-   * - lunar age
-   * - distance
-   * - next major phases
+   * API PARAMETERS
    * ---------------------------------------------------------
    */
 
@@ -145,18 +185,6 @@ export default defineEventHandler(async (event) => {
     include_zodiac: "true",
     include_forecast: "true",
   });
-
-  /*
-   * ---------------------------------------------------------
-   * 2. Sidereal Ephemeris
-   *
-   * Used for:
-   * - exact Vedic Moon sign
-   * - exact degree
-   * - exact sidereal longitude
-   * - Lahiri ayanamsha
-   * ---------------------------------------------------------
-   */
 
   const ephemerisParams = new URLSearchParams({
     start: now,
@@ -170,8 +198,19 @@ export default defineEventHandler(async (event) => {
   });
 
   try {
-    const [moonPhase, ephemeris] = await Promise.all([
-      $fetch<FreeAstroMoonPhaseResponse>(
+    /*
+     * -------------------------------------------------------
+     * FETCH MOON PHASE
+     * -------------------------------------------------------
+     *
+     * Do this separately instead of Promise.all().
+     *
+     * This gives us much better control over rate limiting
+     * and makes it possible to handle a 429 cleanly.
+     */
+
+    const moonPhase =
+      await $fetch<FreeAstroMoonPhaseResponse>(
         `https://api.freeastroapi.com/api/v1/moon/phase?${moonParams.toString()}`,
         {
           method: "GET",
@@ -179,10 +218,17 @@ export default defineEventHandler(async (event) => {
             "x-api-key": config.freeAstroApiKey,
             Accept: "application/json",
           },
-        }
-      ),
+        },
+      );
 
-      $fetch<EphemerisResponse>(
+    /*
+     * -------------------------------------------------------
+     * FETCH SIDEREAL EPHEMERIS
+     * -------------------------------------------------------
+     */
+
+    const ephemeris =
+      await $fetch<EphemerisResponse>(
         `https://api.freeastroapi.com/api/v1/ephemeris?${ephemerisParams.toString()}`,
         {
           method: "GET",
@@ -190,11 +236,11 @@ export default defineEventHandler(async (event) => {
             "x-api-key": config.freeAstroApiKey,
             Accept: "application/json",
           },
-        }
-      ),
-    ]);
+        },
+      );
 
-    const siderealMoon = ephemeris.data.bodies.Moon;
+    const siderealMoon =
+      ephemeris.data.bodies.Moon;
 
     if (!siderealMoon) {
       throw createError({
@@ -203,14 +249,7 @@ export default defineEventHandler(async (event) => {
           "FreeAstroAPI did not return a Moon position.",
       });
     }
-
-    /*
-     * ---------------------------------------------------------
-     * Return one clean application-level object.
-     * ---------------------------------------------------------
-     */
-
-    return {
+    const response = {
       success: true,
 
       timestamp: moonPhase.timestamp,
@@ -224,75 +263,90 @@ export default defineEventHandler(async (event) => {
       },
 
       moon: {
-        /*
-         * Astronomical phase information
-         */
         phase: moonPhase.phase,
 
-        next_phases: moonPhase.next_phases,
+        next_phases:
+          moonPhase.next_phases,
 
-        /*
-         * Vedic / sidereal position
-         */
         zodiac: {
           sign: siderealMoon.sign,
           sign_id: siderealMoon.sign_id,
-
-          /*
-           * Degree within the sidereal sign.
-           *
-           * Example:
-           * 14.305°
-           */
-          degree: siderealMoon.degree_in_sign,
-
-          /*
-           * Full absolute sidereal longitude.
-           *
-           * Example:
-           * 104.305°
-           */
-          longitude: siderealMoon.longitude_deg,
-
+          degree:
+            siderealMoon.degree_in_sign,
+          longitude:
+            siderealMoon.longitude_deg,
           zodiac_type: "sidereal",
           ayanamsha: "lahiri",
-
-          position: siderealMoon.position_text,
+          position:
+            siderealMoon.position_text,
         },
 
-        /*
-         * Movement information
-         */
         movement: {
           speed: siderealMoon.speed,
-          motion_state: siderealMoon.motion_state,
-          retrograde: siderealMoon.retrograde,
-          stationary: siderealMoon.is_stationary,
+          motion_state:
+            siderealMoon.motion_state,
+          retrograde:
+            siderealMoon.retrograde,
+          stationary:
+            siderealMoon.is_stationary,
         },
 
-        /*
-         * Astronomical coordinates
-         */
-        latitude: siderealMoon.latitude_deg,
+        latitude:
+          siderealMoon.latitude_deg,
 
-        distance_au: siderealMoon.distance_au,
+        distance_au:
+          siderealMoon.distance_au,
       },
 
       metadata: {
-        zodiac_system: "Vedic / Sidereal",
+        zodiac_system:
+          "Vedic / Sidereal",
         ayanamsha: "Lahiri",
         source: "FreeAstroAPI",
-        calculated_at: new Date().toISOString(),
+        calculated_at:
+          new Date().toISOString(),
       },
     };
+
+    /*
+     * -------------------------------------------------------
+     * STORE CACHE
+     * -------------------------------------------------------
+     */
+
+    moonCache = {
+      expiresAt:
+        Date.now() + CACHE_TTL,
+
+      data: response,
+    };
+
+    return response;
   } catch (error: any) {
     console.error(
       "FreeAstroAPI lunar calculation error:",
-      error
+      error,
     );
 
+    /*
+     * Explicitly identify rate limiting.
+     */
+
+    const statusCode =
+      error?.statusCode ??
+      error?.status ??
+      502;
+
+    if (statusCode === 429) {
+      throw createError({
+        statusCode: 429,
+        statusMessage:
+          "Lunar data is temporarily rate limited. Please try again shortly.",
+      });
+    }
+
     throw createError({
-      statusCode: error?.statusCode || 502,
+      statusCode,
       statusMessage:
         error?.data?.message ||
         error?.message ||

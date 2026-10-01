@@ -13,9 +13,9 @@ import Donations from "@/components/home/Donations.vue";
   <main class="min-h-screen overflow-hidden bg-[#090711] text-white selection:bg-amber-300 selection:text-black">
     <Hero />
     <About />
-    <MoonNow />
     <PersonalDailyHoroscope />
-    <Readings />
+    <Readings />    
+    <MoonNow />
     <Products />
     <Ifa />
     <Donations />
