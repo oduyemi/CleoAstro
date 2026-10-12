@@ -47,6 +47,15 @@ const createBookingReference = (): string =>
     .toUpperCase()}`;
 
 export default defineEventHandler(async (event) => {
+  try {
+    await dbConnect();
+  } catch {
+    throw createError({
+      statusCode: 503,
+      statusMessage:
+        "The booking service is temporarily unavailable. Please try again later.",
+    });
+  }    
   const body = await readBody<Partial<BookingBody>>(event);
 
   const readingId = clean(body.readingId) as PackageId;
