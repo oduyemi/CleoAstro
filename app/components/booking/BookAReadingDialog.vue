@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import {
@@ -471,7 +472,7 @@ watch(
                     Your details
                   </template>
                   <template v-else-if="step === 'payment'">
-                    Complete your booking
+                    {{ isVip ? "Your coaching enquiry" : "Complete your booking" }}
                   </template>
                   <template v-else>
                     Thank you for booking
@@ -488,7 +489,7 @@ watch(
                     Share your details so your booking can be prepared.
                   </template>
                   <template v-else-if="step === 'payment'">
-                    Verify the payment instructions before transferring money.
+                    {{ isVip ? "Tell us a little more about the guidance you need." : "Verify the payment instructions before transferring money." }}
                   </template>
                   <template v-else>
                     Your request has been submitted successfully.
@@ -812,12 +813,11 @@ watch(
               </div>
             </div>
 
-            <!-- PAYMENT / VIP REQUEST -->
-                        <div
-              v-else-if="step === 'payment'"
+            <!-- PAYMENT -->
+            <div
+              v-else-if="step === 'payment' && !isVip"
               class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
             >
-
               <div class="flex items-start gap-3">
                 <div
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/25 bg-[#6B0F1A]/30"
@@ -937,6 +937,42 @@ watch(
               </div>
             </div>
 
+            <!-- VIP COACHING ENQUIRY -->
+            <div
+              v-else-if="step === 'payment' && isVip"
+              class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/25 bg-[#6B0F1A]/30"
+                >
+                  <MessageCircle class="h-5 w-5 text-[#C8A77A]" />
+                </div>
+
+                <div>
+                  <p class="text-[9px] uppercase tracking-widest text-[#C8A77A]">
+                    Personal coaching
+                  </p>
+                  <h3 class="mt-2 font-serif text-xl">
+                    Submit your coaching enquiry
+                  </h3>
+                  <p class="mt-2 text-sm leading-6 text-[#C58B92]/75">
+                    VIP Coaching fees and arrangements are personalised. Submit your
+                    enquiry and CleoAstro will reach out to discuss the programme
+                    and next steps. No payment is required at this stage.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-5 flex gap-3 rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13]/40 p-4">
+                <Info class="mt-0.5 h-4 w-4 shrink-0 text-[#C8A77A]" />
+                <p class="text-xs leading-6 text-[#C58B92]/75">
+                  Your enquiry will be submitted for follow-up. You do not need to
+                  make a bank transfer or provide a transfer reference.
+                </p>
+              </div>
+            </div>
+
             <!-- CONFIRMATION -->
             <div
               v-else
@@ -1004,7 +1040,7 @@ watch(
               
 
               <p
-                v-else
+                v-if="!isVip"
                 class="mx-auto mt-5 max-w-md text-[11px] leading-5 text-[#C58B92]/60"
               >
                 Keep your transfer receipt until your payment has been verified.
