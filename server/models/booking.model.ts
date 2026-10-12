@@ -1,3 +1,4 @@
+
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export type BookingPaymentStatus =
@@ -14,49 +15,47 @@ export type BookingStatus =
   | "completed"
   | "cancelled";
 
+export type PackageId =
+  | "basic"
+  | "standard"
+  | "premium"
+  | "vip-coaching"
+  | "master-class";
+
+export type MasterClassPaymentPlan = "full" | "stage";
+
 export interface IBooking extends Document {
   reference: string;
-
   reading: {
-    id:
-      | "birth-chart"
-      | "vedic-consultation"
-      | "deep-dive"
-      | "ancestral-karmic";
+    id: PackageId;
     name: string;
     amount: number;
     currency: "NGN";
   };
-
   customer: {
     fullName: string;
     email: string;
     phone: string;
   };
-
   birthDetails: {
     date: string;
     time: string;
     place: string;
   };
-
   question: string;
-
   payment: {
     method: "bank-transfer";
     status: BookingPaymentStatus;
-    transferReference: string;
+    transferReference?: string;
+    plan?: MasterClassPaymentPlan;
     amount: number;
     currency: "NGN";
     verifiedAt?: Date;
     verifiedBy?: string;
     rejectionReason?: string;
   };
-
   status: BookingStatus;
-
   adminNotes?: string;
-
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,25 +75,23 @@ const BookingSchema = new Schema<IBooking>(
         type: String,
         required: true,
         enum: [
-          "birth-chart",
-          "vedic-consultation",
-          "deep-dive",
-          "ancestral-karmic",
+          "basic",
+          "standard",
+          "premium",
+          "vip-coaching",
+          "master-class",
         ],
       },
-
       name: {
         type: String,
         required: true,
         trim: true,
       },
-
       amount: {
         type: Number,
         required: true,
         min: 0,
       },
-
       currency: {
         type: String,
         required: true,
@@ -110,7 +107,6 @@ const BookingSchema = new Schema<IBooking>(
         trim: true,
         maxlength: 150,
       },
-
       email: {
         type: String,
         required: true,
@@ -118,7 +114,6 @@ const BookingSchema = new Schema<IBooking>(
         lowercase: true,
         maxlength: 200,
       },
-
       phone: {
         type: String,
         required: true,
@@ -128,31 +123,21 @@ const BookingSchema = new Schema<IBooking>(
     },
 
     birthDetails: {
-      date: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      time: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
+      date: { type: String, trim: true, default: "" },
+      time: { type: String, trim: true, default: "" },
       place: {
         type: String,
-        required: true,
         trim: true,
         maxlength: 200,
+        default: "",
       },
     },
 
     question: {
       type: String,
-      required: true,
       trim: true,
       maxlength: 3000,
+      default: "",
     },
 
     payment: {
@@ -162,7 +147,6 @@ const BookingSchema = new Schema<IBooking>(
         enum: ["bank-transfer"],
         default: "bank-transfer",
       },
-
       status: {
         type: String,
         required: true,
@@ -176,36 +160,28 @@ const BookingSchema = new Schema<IBooking>(
         default: "unpaid",
         index: true,
       },
-
       transferReference: {
         type: String,
-        required: true,
         trim: true,
-        index: true,
+        maxlength: 100,
       },
-
+      plan: {
+        type: String,
+        enum: ["full", "stage"],
+      },
       amount: {
         type: Number,
         required: true,
         min: 0,
       },
-
       currency: {
         type: String,
         required: true,
         enum: ["NGN"],
         default: "NGN",
       },
-
-      verifiedAt: {
-        type: Date,
-      },
-
-      verifiedBy: {
-        type: String,
-        trim: true,
-      },
-
+      verifiedAt: Date,
+      verifiedBy: { type: String, trim: true },
       rejectionReason: {
         type: String,
         trim: true,
@@ -233,9 +209,7 @@ const BookingSchema = new Schema<IBooking>(
       maxlength: 3000,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true },
 );
 
 const Booking: Model<IBooking> =

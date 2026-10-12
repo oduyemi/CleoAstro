@@ -24,7 +24,7 @@ const handleReadingSelection = (reading: {
   name: string;
   description: string;
   duration: string;
-  price: number;
+  price: number | null;
 }) => {
   console.log("Selected reading:", reading);
 };

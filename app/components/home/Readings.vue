@@ -365,11 +365,6 @@ const handleReadingSelection = (_selection: unknown) => {
   // Reserved for future booking-service selection.
 };
 
-/*
-|--------------------------------------------------------------------------
-| COMPUTED
-|--------------------------------------------------------------------------
-*/
 
 const DEFAULT_RASHI: RashiKey = "karka";
 
