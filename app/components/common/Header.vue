@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import {
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from "vue";
-
-import {
-  ArrowRight,
-  ChevronRight,
-  Menu,
-  X,
-} from "lucide-vue-next";
-
+import {onMounted, onUnmounted, ref, watch} from "vue";
+import {ArrowRight, ChevronRight, Menu, X} from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
+import { motion, useReducedMotion } from "motion-v";
+import BookAReadingDialog from "@/components/booking/BookAReadingDialog.vue";
+
+
+const bookingOpen = ref(false);
+const prefersReducedMotion = useReducedMotion();
+
+const openBooking = () => {
+  bookingOpen.value = true;
+};
 
 const mobileMenuOpen = ref(false);
 const scrolled = ref(false);
@@ -251,6 +249,7 @@ onUnmounted(() => {
 
           <Button
             class="group relative h-11 overflow-hidden rounded-full border border-amber-200/20 bg-gradient-to-r from-amber-100/10 via-amber-100/[0.07] to-transparent px-5 text-[12px] font-semibold tracking-wide text-amber-100 shadow-[inset_0_1px_rgba(255,255,255,0.08)] backdrop-blur-md transition-all duration-500 hover:border-amber-200/40 hover:bg-amber-100 hover:text-[#090711] hover:shadow-[0_10px_40px_rgba(251,191,36,0.15)]"
+            @click="openBooking"  
           >
             <!-- Shine -->
 
@@ -435,6 +434,10 @@ onUnmounted(() => {
       />
     </div>
   </Transition>
+
+  <BookAReadingDialog
+      v-model:open="bookingOpen"
+    />
 </template>
 
 <style scoped>

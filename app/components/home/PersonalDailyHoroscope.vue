@@ -7,7 +7,9 @@ import {
   Clock3,
   Heart,
   LoaderCircle,
-  Star,
+  Moon,
+  Orbit,
+  Sparkles,
   Sun,
   Target,
   UserRound,
@@ -25,40 +27,38 @@ interface PersonalForm {
   city: string;
 }
 
+interface DashaPeriod {
+  level?: string;
+  lord?: string;
+  start?: string;
+  end?: string;
+  progress_fraction?: number;
+  remaining_days?: number;
+  path?: string[];
+}
+
 interface PersonalProfile {
-  lagna?: {
-    sign?: string;
-    sign_id?: number;
-    degree?: number;
-  };
+  lagna?: { sign?: string; sign_id?: number; degree?: number };
   moon?: {
     sign?: string;
     sign_id?: number;
-    degree?: number;
-  };
-  moon_sign?: {
-    sign?: string;
-    sign_id?: number;
-    degree?: number;
-  };
-  nakshatra?: {
-    name?: string;
+    nakshatra?: string;
+    nakshatra_id?: number;
     pada?: number;
-    lord?: string;
+    nakshatra_lord?: string;
   };
-  moon_nakshatra?: {
-    name?: string;
-    pada?: number;
-    lord?: string;
-  };
-  active_dasha?: unknown;
+  active_dasha_stack?: DashaPeriod[];
 }
 
 interface PersonalTheme {
   headline?: string;
-  title?: string;
-  primary_influence?: string;
-  dominant_dasha?: string;
+  primary_influence?: {
+    title?: string;
+    summary?: string;
+    polarity?: string;
+    category?: string;
+  };
+  dominant_dasha?: DashaPeriod;
   panchang_mood?: string;
 }
 
@@ -77,27 +77,20 @@ interface HoroscopeSection {
   reading?: string;
   advice?: string;
   summary?: string;
+  explanation?: string;
   score?: number;
   band?: string;
+  confidence?: number;
 }
 
 interface PersonalPanchang {
-  weekday?: string;
-  lunar_month?: string;
-  tithi?: {
-    name?: string;
-    paksha?: string;
-  };
-  nakshatra?: {
-    name?: string;
-    pada?: number;
-  };
-  yoga?: {
-    name?: string;
-  };
-  karana?: {
-    name?: string;
-  };
+  date?: string;
+  weekday?: { number?: number; name?: string };
+  lunar_month?: { name?: string; amanta?: boolean; vikram_samvat?: number };
+  tithi?: { name?: string; paksha?: string; ends_at?: string };
+  nakshatra?: { name?: string; pada?: number; lord?: string; ends_at?: string };
+  yoga?: { name?: string; ends_at?: string };
+  karana?: { name?: string; ends_at?: string };
   sunrise?: string;
   sunset?: string;
 }
@@ -107,22 +100,25 @@ interface TimingPeriod {
   start?: string;
   end?: string;
   quality?: string;
+  warnings?: Array<{ label?: string; message?: string }>;
 }
 
 interface PersonalTiming {
   favorable_periods?: TimingPeriod[];
   caution_periods?: TimingPeriod[];
-  rahu_kalam?: {
-    start?: string;
-    end?: string;
-  };
+  rahu_kalam?: TimingPeriod;
+  abhijit?: TimingPeriod;
+  timezone?: string;
+  sunrise?: string;
+  sunset?: string;
 }
 
 interface PersonalDasha {
-  dominant_period?: string;
-  current?: string;
-  active?: string;
-  moon_nakshatra_basis?: string;
+  active_periods?: DashaPeriod[];
+  dominant_period?: DashaPeriod;
+  moon_nakshatra?: { name?: string; pada?: number; lord?: string };
+  reference_date?: string;
+  interpretation_context?: string;
 }
 
 interface PersonalRemedy {
@@ -136,22 +132,27 @@ interface PersonalMeta {
   target_date?: string;
   timezone?: string;
   generated_at?: string;
+  endpoint?: string;
   endpoint_version?: string;
+  version?: string;
 }
 
 interface PersonalHoroscope {
   meta?: PersonalMeta;
   profile?: PersonalProfile;
   theme?: PersonalTheme;
+  scores?: Record<string, { score?: number; band?: string; confidence?: number; explanation?: string }>;
   narrative?: Narrative;
   sections?: HoroscopeSection[];
   panchang?: PersonalPanchang;
   timing?: PersonalTiming;
   dasha?: PersonalDasha;
   remedy?: PersonalRemedy;
+  influences?: Record<string, unknown>;
+  evidence?: Record<string, unknown>;
 }
 
-interface PersonalApiResponse {
+interface PersonalApiResponse extends PersonalHoroscope {
   success?: boolean;
   data?: PersonalHoroscope;
   horoscope?: PersonalHoroscope;
@@ -237,19 +238,11 @@ const dasha = computed(() => result.value?.dasha ?? {});
 const remedy = computed(() => result.value?.remedy ?? {});
 
 const moonSign = computed(() => {
-  return (
-    profile.value.moon_sign?.sign ||
-    profile.value.moon?.sign ||
-    "—"
-  );
+  return profile.value.moon?.sign || "—";
 });
 
 const moonNakshatra = computed(() => {
-  return (
-    profile.value.moon_nakshatra?.name ||
-    profile.value.nakshatra?.name ||
-    "—"
-  );
+  return profile.value.moon?.nakshatra || dasha.value.moon_nakshatra?.name || "—";
 });
 
 const lagna = computed(() => {
@@ -421,10 +414,12 @@ const fetchPersonalHoroscope = async () => {
       },
     );
 
+    // V2 normally returns the horoscope fields at the top level.
+    // Keep the fallbacks for deployments that wrap the upstream payload.
     const nextResult =
       response.data ??
       response.horoscope ??
-      null;
+      (response.meta && response.profile ? response : null);
 
     if (!nextResult) {
       throw new Error(
@@ -465,14 +460,6 @@ const nextTickScrollToResults = async () => {
     });
 };
 
-const scrollToForm = () => {
-  document
-    .getElementById("personal-horoscope-form")
-    ?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-};
 </script>
 
 <template>
@@ -836,27 +823,24 @@ const scrollToForm = () => {
                 </p>
               </div>
 
-              <Button
+              
+              <button
                 type="submit"
                 :disabled="loading"
-                class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] shadow-[0_12px_36px_rgba(107,15,26,0.24)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/55 hover:bg-[#7E3541] hover:shadow-[0_16px_45px_rgba(107,15,26,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
+                class="group inline-flex h-12 items-center justify-center rounded-full border border-[#C8A77A]/35 bg-[#6B0F1A] px-7 text-[13px] font-medium tracking-wide text-[#F1E8E3] transition-all hover:bg-[#7E3541] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <LoaderCircle
                   v-if="loading"
                   class="mr-2 h-4 w-4 animate-spin"
                 />
 
-                {{
-                  loading
-                    ? "Reading your chart..."
-                    : "Reveal my horoscope"
-                }}
+                {{ loading ? "Reading your chart..." : "Reveal my horoscope" }}
 
                 <ArrowRight
                   v-if="!loading"
-                  class="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                  class="ml-2 h-4 w-4"
                 />
-              </Button>
+              </button>
             </div>
           </div>
         </form>
@@ -934,7 +918,6 @@ const scrollToForm = () => {
           >
             {{
               theme.headline ||
-              theme.title ||
               "Your personal sky is speaking."
             }}
           </h2>
@@ -1057,7 +1040,7 @@ const scrollToForm = () => {
                   v-if="theme.primary_influence"
                   class="mt-1 text-xs text-white/25"
                 >
-                  {{ theme.primary_influence }}
+                  {{ theme.primary_influence?.title || theme.primary_influence?.summary || "" }}
                 </p>
               </div>
             </div>
@@ -1226,9 +1209,8 @@ const scrollToForm = () => {
         <!-- Dasha -->
         <div
           v-if="
-            dasha.dominant_period ||
-            dasha.current ||
-            dasha.active
+            dasha.dominant_period?.lord ||
+            dasha.active_periods?.length
           "
           class="mt-6 rounded-[2rem] border border-violet-200/10 bg-violet-200/[0.025] p-7 sm:p-9"
         >
@@ -1248,18 +1230,18 @@ const scrollToForm = () => {
 
               <h3 class="mt-3 text-xl font-medium text-white">
                 {{
-                  dasha.dominant_period ||
-                  dasha.current ||
-                  dasha.active
+                  dasha.dominant_period?.lord ||
+                  dasha.active_periods?.[0]?.lord ||
+                  theme.dominant_dasha?.lord ||
+                  "Active period unavailable"
                 }}
               </h3>
 
               <p
-                v-if="dasha.moon_nakshatra_basis"
+                v-if="dasha.interpretation_context || dasha.moon_nakshatra?.name"
                 class="mt-2 text-xs leading-6 text-white/30"
               >
-                Moon Nakshatra basis:
-                {{ dasha.moon_nakshatra_basis }}
+                {{ dasha.interpretation_context || `Moon Nakshatra: ${dasha.moon_nakshatra?.name}` }}
               </p>
             </div>
           </div>
@@ -1405,7 +1387,7 @@ const scrollToForm = () => {
                 </p>
 
                 <p class="mt-2 text-xs text-white/50">
-                  {{ panchang.lunar_month || "—" }}
+                  {{ panchang.lunar_month?.name || "—" }}
                 </p>
               </div>
             </div>
