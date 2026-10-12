@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import {
@@ -48,8 +47,57 @@ interface BookingDetails {
   question: string;
 }
 
-const WHATSAPP_NUMBER = "447391456228";
-const WHATSAPP_DISPLAY = "+44 7391456228";
+const bankDetails = {
+  bankName: "PalmPay",
+  accountName: "CLEOASTRO(Samuel)",
+  accountNumber: "8995618317",
+};
+
+const bankAccountRows = [
+  { key: "bankName", label: "Bank name", value: bankDetails.bankName },
+  { key: "accountName", label: "Account name", value: bankDetails.accountName },
+  { key: "accountNumber", label: "Account number", value: bankDetails.accountNumber },
+] as const;
+
+const copiedBankField = ref("");
+const copiedAmount = ref(false);
+
+const copyBankDetail = async (
+  field: "bankName" | "accountName" | "accountNumber",
+) => {
+  if (!import.meta.client) return;
+
+  try {
+    await navigator.clipboard.writeText(bankDetails[field]);
+    copiedBankField.value = field;
+
+    window.setTimeout(() => {
+      if (copiedBankField.value === field) {
+        copiedBankField.value = "";
+      }
+    }, 1800);
+  } catch (error: unknown) {
+    console.error("Unable to copy bank detail:", error);
+    errorMessage.value =
+      "Unable to copy automatically. Please select and copy the account detail manually.";
+  }
+};
+
+const copyPaymentAmount = async () => {
+  if (!import.meta.client) return;
+
+  try {
+    await navigator.clipboard.writeText(String(amount.value));
+    copiedAmount.value = true;
+    window.setTimeout(() => {
+      copiedAmount.value = false;
+    }, 1800);
+  } catch (error: unknown) {
+    console.error("Unable to copy payment amount:", error);
+    errorMessage.value =
+      "Unable to copy the amount automatically. Please copy it manually.";
+  }
+};
 
 const props = withDefaults(defineProps<{ open?: boolean }>(), {
   open: false,
@@ -247,23 +295,7 @@ const continueToPayment = () => {
   step.value = "payment";
 };
 
-const whatsappUrl = computed(() => {
-  const item = selectedReading.value;
-  const d = bookingDetails.value;
 
-  const message = [
-    `Hello CleoAstro, I would like to ${isVip.value ? "request VIP Coaching" : "confirm the booking/payment details"} for the ${item?.name ?? "selected"} package.`,
-    `Name: ${d.fullName}`,
-    `Email: ${d.email}`,
-    `Phone: ${d.phone}`,
-    ...(isMasterClass.value
-      ? [`Master Class payment plan: ${paymentPlan.value === "full" ? "Full payment - ₦500,000" : "Stage payment - ₦300,000 per stage"}`]
-      : []),
-    "Please provide the correct account details and confirm the amount before I make any payment.",
-  ].join("\n");
-
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-});
 
 const copyReference = async () => {
   if (!import.meta.client || !bookingReference.value) return;
@@ -367,6 +399,8 @@ const reset = () => {
   errorMessage.value = "";
   loading.value = false;
   copied.value = false;
+  copiedBankField.value = "";
+  copiedAmount.value = false;
 
   bookingDetails.value = {
     fullName: "",
@@ -771,136 +805,135 @@ watch(
                   </template>
                   <template v-else>
                     Your birth details help prepare your consultation.
-                    Please verify payment instructions with CleoAstro before
-                    transferring any money.
+                    Your bank account details and exact payment amount will be shown
+                    on the next step. Please use those details when making your transfer.
                   </template>
                 </p>
               </div>
             </div>
 
             <!-- PAYMENT / VIP REQUEST -->
-            <div
+                        <div
               v-else-if="step === 'payment'"
-              class="mx-auto max-w-2xl"
+              class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
             >
-              <div class="rounded-2xl border border-[#C58B92]/15 bg-[#261018]/45 p-5 sm:p-7">
-                <p class="text-[9px] uppercase tracking-widest text-[#C58B92]/55">
-                  {{ isVip ? "Coaching enquiry" : "Booking summary" }}
-                </p>
 
-                <div class="mt-4 flex items-start justify-between gap-4">
-                  <div>
-                    <h3 class="font-serif text-2xl">
-                      {{ selectedReading?.name }}
-                    </h3>
-                    <p class="mt-2 text-xs text-[#C58B92]/65">
-                      {{ bookingDetails.fullName }}
-                    </p>
-                    <p
-                      v-if="isMasterClass"
-                      class="mt-2 text-xs text-[#C58B92]/65"
-                    >
-                      {{ paymentPlan === "full" ? "Full payment" : "Stage payment" }}
-                    </p>
-                  </div>
-                  <p class="shrink-0 text-lg text-[#C8A77A]">
-                    {{ isVip ? "On request" : formatPrice(amount) }}
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/25 bg-[#6B0F1A]/30"
+                >
+                  <CheckCircle2 class="h-5 w-5 text-[#C8A77A]" />
+                </div>
+
+                <div>
+                  <p class="text-[9px] uppercase tracking-widest text-[#C8A77A]">
+                    Bank transfer
+                  </p>
+
+                  <h3 class="mt-2 font-serif text-xl">
+                    Make your payment
+                  </h3>
+
+                  <p class="mt-2 text-sm leading-6 text-[#C58B92]/75">
+                    Transfer the exact amount below to the PalmPay account. You can copy
+                    each account detail using the buttons provided.
                   </p>
                 </div>
               </div>
 
-              <div
-                v-if="isVip"
-                class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
-              >
-                <MessageCircle class="h-6 w-6 text-[#C8A77A]" />
-                <h3 class="mt-4 font-serif text-xl">Request your coaching arrangement</h3>
-                <p class="mt-3 text-sm leading-6 text-[#C58B92]/75">
-                  Contact CleoAstro to discuss your requirements, pricing and
-                  coaching arrangements. No payment is required to submit this enquiry.
-                </p>
-                <a
-                  :href="whatsappUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#F1E8E3] px-5 text-sm font-medium text-[#1D0C13] transition hover:bg-white"
+              <div class="mt-6 space-y-3">
+                <div
+                  v-for="account in bankAccountRows"
+                  :key="account.key"
+                  class="flex items-center justify-between gap-3 rounded-xl border border-[#C58B92]/15 bg-[#1D0C13]/55 p-4"
                 >
-                  <MessageCircle class="h-4 w-4" />
-                  Contact via WhatsApp
-                  <ArrowRight class="h-4 w-4" />
-                </a>
-                <p class="mt-3 text-[11px] text-[#C58B92]/65">
-                  WhatsApp: {{ WHATSAPP_DISPLAY }}
-                </p>
+                  <div class="min-w-0">
+                    <p class="text-[9px] uppercase tracking-widest text-[#C58B92]/55">
+                      {{ account.label }}
+                    </p>
+
+                    <p class="mt-1 break-all text-sm font-medium text-[#F1E8E3]">
+                      {{ account.value }}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#C8A77A]/25 px-3 py-2 text-[10px] text-[#C8A77A] transition hover:bg-[#42141F]"
+                    :aria-label="`Copy ${account.label}`"
+                    @click="copyBankDetail(account.key)"
+                  >
+                    <Check
+                      v-if="copiedBankField === account.key"
+                      class="h-3.5 w-3.5"
+                    />
+                    <Copy v-else class="h-3.5 w-3.5" />
+
+                    {{ copiedBankField === account.key ? "Copied" : "Copy" }}
+                  </button>
+                </div>
               </div>
 
-              <div
-                v-else
-                class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
-              >
-                <div class="flex items-start gap-4">
-                  <MessageCircle class="mt-1 h-5 w-5 shrink-0 text-[#C8A77A]" />
-                  <div>
-                    <p class="text-[9px] uppercase tracking-widest text-[#C8A77A]">
-                      Payment instructions
-                    </p>
-                    <h3 class="mt-2 font-serif text-xl">
-                      Verify the account details first
-                    </h3>
-                    <p class="mt-3 text-sm leading-6 text-[#C58B92]/75">
-                      The official flyer instructs customers to request account
-                      details by email or WhatsApp. Please contact CleoAstro and
-                      verify the account details before making a transfer.
-                    </p>
-                    <a
-                      :href="whatsappUrl"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#F1E8E3] px-5 text-sm font-medium text-[#1D0C13] transition hover:bg-white"
-                    >
-                      <MessageCircle class="h-4 w-4" />
-                      Request account details
-                      <ArrowRight class="h-4 w-4" />
-                    </a>
-                    <p class="mt-3 text-[11px] text-[#C58B92]/65">
-                      WhatsApp: {{ WHATSAPP_DISPLAY }}
-                    </p>
-                    <p class="mt-3 text-[11px] leading-5 text-[#C58B92]/55">
-                      Payment validates sessions. Please verify the account details
-                      before transferring.
-                    </p>
-                  </div>
+              <div class="mt-5 flex items-center justify-between gap-4 rounded-xl border border-[#C8A77A]/20 bg-[#1D0C13]/60 p-4">
+                <div>
+                  <p class="text-[9px] uppercase tracking-widest text-[#C58B92]/55">
+                    Amount to transfer
+                  </p>
+
+                  <p class="mt-1 text-xl font-medium text-[#C8A77A]">
+                    {{ formatPrice(amount) }}
+                  </p>
+
+                  <p
+                    v-if="isMasterClass && paymentPlan === 'stage'"
+                    class="mt-1 text-[10px] text-[#C58B92]/60"
+                  >
+                    Stage payment
+                  </p>
                 </div>
 
-                <div class="my-6 h-px bg-[#C58B92]/15" />
+                <button
+                  type="button"
+                  class="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#C8A77A]/25 px-3 py-2 text-[10px] text-[#C8A77A] transition hover:bg-[#42141F]"
+                  aria-label="Copy payment amount"
+                  @click="copyPaymentAmount"
+                >
+                  <Check v-if="copiedAmount" class="h-3.5 w-3.5" />
+                  <Copy v-else class="h-3.5 w-3.5" />
+                  {{ copiedAmount ? "Copied" : "Copy amount" }}
+                </button>
+              </div>
 
-                <label class="block space-y-2">
-                  <span class="field-label">
-                    Transfer reference *
-                  </span>
-                  <input
-                    v-model="transferReference"
-                    class="field-input"
-                    placeholder="Enter the reference on your transfer receipt"
-                    maxlength="100"
-                  />
-                  <span class="block text-[10px] leading-5 text-[#C58B92]/55">
-                    Only submit this booking after making your transfer. Your
-                    booking will remain unverified until payment is checked.
-                  </span>
-                </label>
+              <div class="my-6 h-px bg-[#C58B92]/15" />
 
-                <div class="mt-5 flex items-center justify-between gap-4 rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13]/50 p-4">
-                  <div>
-                    <p class="text-[9px] uppercase tracking-widest text-[#C58B92]/55">
-                      Amount to transfer
-                    </p>
-                    <p class="mt-1 text-xl text-[#C8A77A]">
-                      {{ formatPrice(amount) }}
-                    </p>
-                  </div>
-                  <CalendarDays class="h-5 w-5 text-[#C8A77A]/60" />
-                </div>
+              <label class="block space-y-2">
+                <span class="field-label">
+                  Transfer reference *
+                </span>
+
+                <input
+                  v-model="transferReference"
+                  class="field-input"
+                  placeholder="Enter the reference on your transfer receipt"
+                  maxlength="100"
+                  autocomplete="off"
+                  required
+                />
+
+                <span class="block text-[10px] leading-5 text-[#C58B92]/65">
+                  After making the transfer, enter the reference from your receipt and
+                  click the confirmation button below. Your payment will remain
+                  unverified until it has been checked.
+                </span>
+              </label>
+
+              <div class="mt-5 flex gap-3 rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13]/40 p-4">
+                <Info class="mt-0.5 h-4 w-4 shrink-0 text-[#C8A77A]" />
+
+                <p class="text-xs leading-6 text-[#C58B92]/75">
+                  Please transfer only to the account shown above. Keep your receipt
+                  until CleoAstro confirms that your payment has been verified.
+                </p>
               </div>
             </div>
 
@@ -925,8 +958,10 @@ watch(
                   the arrangements and fee with CleoAstro via WhatsApp.
                 </template>
                 <template v-else>
-                  Your booking has been submitted. This does not confirm
-                  payment: CleoAstro must verify your transfer first.
+                  Your booking has been submitted successfully, and your payment is
+                  awaiting verification. I will personally review your transfer and
+                  reach out to you as soon as your payment has been verified.
+                  Please keep your transfer receipt until you receive confirmation.
                 </template>
               </p>
 
@@ -966,16 +1001,7 @@ watch(
                 </div>
               </div>
 
-              <a
-                v-if="isVip"
-                :href="whatsappUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-6 inline-flex items-center gap-2 rounded-full border border-[#C8A77A]/30 px-5 py-3 text-xs text-[#C8A77A] hover:bg-[#42141F]"
-              >
-                <MessageCircle class="h-4 w-4" />
-                Contact CleoAstro
-              </a>
+              
 
               <p
                 v-else
@@ -1057,7 +1083,11 @@ watch(
             >
               <span v-if="loading">Submitting...</span>
               <span v-else>
-                {{ isVip ? "Submit coaching enquiry" : "I've made the transfer" }}
+                {{
+                  isVip
+                    ? "Submit coaching enquiry"
+                    : "I've made the payment — verify it"
+                }}
               </span>
               <ArrowRight v-if="!loading" class="ml-2 h-4 w-4" />
             </Button>
