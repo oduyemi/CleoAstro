@@ -49,7 +49,7 @@ const products: Product[] = [
     description:
       "A distinctive everyday cap inspired by the cosmos, crafted to carry the Cleo Astro spirit with effortless style.",
     price: "₦50,000",
-    image: "/images/products/cap.jpeg",
+    image: "/images/products/cap2.jpeg",
   },
   {
     id: 4,
