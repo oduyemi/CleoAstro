@@ -1,5 +1,5 @@
-
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
+import type { Document, Model } from "mongoose";
 
 export type BookingPaymentStatus =
   | "unpaid"
@@ -26,23 +26,28 @@ export type MasterClassPaymentPlan = "full" | "stage";
 
 export interface IBooking extends Document {
   reference: string;
+
   reading: {
     id: PackageId;
     name: string;
     amount: number;
     currency: "NGN";
   };
+
   customer: {
     fullName: string;
     email: string;
     phone: string;
   };
+
   birthDetails: {
     date: string;
     time: string;
     place: string;
   };
+
   question: string;
+
   payment: {
     method: "bank-transfer";
     status: BookingPaymentStatus;
@@ -54,6 +59,7 @@ export interface IBooking extends Document {
     verifiedBy?: string;
     rejectionReason?: string;
   };
+
   status: BookingStatus;
   adminNotes?: string;
   createdAt: Date;
@@ -123,8 +129,16 @@ const BookingSchema = new Schema<IBooking>(
     },
 
     birthDetails: {
-      date: { type: String, trim: true, default: "" },
-      time: { type: String, trim: true, default: "" },
+      date: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      time: {
+        type: String,
+        trim: true,
+        default: "",
+      },
       place: {
         type: String,
         trim: true,
@@ -180,8 +194,13 @@ const BookingSchema = new Schema<IBooking>(
         enum: ["NGN"],
         default: "NGN",
       },
-      verifiedAt: Date,
-      verifiedBy: { type: String, trim: true },
+      verifiedAt: {
+        type: Date,
+      },
+      verifiedBy: {
+        type: String,
+        trim: true,
+      },
       rejectionReason: {
         type: String,
         trim: true,
@@ -209,11 +228,13 @@ const BookingSchema = new Schema<IBooking>(
       maxlength: 3000,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 const Booking: Model<IBooking> =
-  mongoose.models.Booking ||
+  (mongoose.models.Booking as Model<IBooking> | undefined) ??
   mongoose.model<IBooking>("Booking", BookingSchema);
 
 export default Booking;
