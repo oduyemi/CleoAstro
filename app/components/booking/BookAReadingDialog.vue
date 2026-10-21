@@ -1,3 +1,6 @@
+Update the VIP Coaching to have a price of  $1500 for 3 months. For payment, since the user is to pay into a naira account, the amount to be paid should be a current equivalent of 1500.
+
+dialog
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
@@ -20,6 +23,7 @@ type PackageId =
   | "basic"
   | "standard"
   | "premium"
+  | "platinum"
   | "vip-coaching"
   | "master-class";
 
@@ -109,13 +113,18 @@ const emit = defineEmits<{
   select: [reading: Package];
 }>();
 
+const VIP_COACHING_USD_PRICE = 1500;
+const USD_TO_NGN_RATE = 1332.255; // Indicative market rate, 21 Oct 2026
+const VIP_COACHING_NGN_PRICE =
+  Math.round((VIP_COACHING_USD_PRICE * USD_TO_NGN_RATE) / 1000) * 1000;
+
 const packages: Package[] = [
   {
     id: "basic",
     name: "Basic",
     description:
       "Basic Package / Student. Personalized birth chart analysis with an overview of your Sun, Moon and Rising signs.",
-    duration: "3 days delivery",
+    duration: "7 days delivery",
     price: 50000,
     category: "consultation",
     idealFor: [
@@ -130,7 +139,7 @@ const packages: Package[] = [
     name: "Standard",
     description:
       "Everything in Basic, plus an in-depth transit forecast and a 30-minute voice or video consultation.",
-    duration: "3 days delivery",
+    duration: "7 days delivery",
     price: 150000,
     featured: true,
     category: "consultation",
@@ -147,7 +156,7 @@ const packages: Package[] = [
     name: "Premium",
     description:
       "Family Package with a 12-month transit and progression forecast, Solar Return reading, and Astro-Cartography and Vastu overview.",
-    duration: "3 days delivery",
+    duration: "7 days delivery",
     price: 500000,
     category: "consultation",
     idealFor: [
@@ -159,16 +168,33 @@ const packages: Package[] = [
     ],
   },
   {
+    id: "platinum",
+    name: "Platinum",
+    description:
+      "Premium Package with a 12-month transit and progression forecast, Solar Return reading, and Astro-Cartography, Vastu overview, and Ifa & Afa Consultation.",
+    duration: "7 days delivery",
+    price: 700000,
+    category: "consultation",
+    idealFor: [
+      "Everything in Standard",
+      "12-month transit and progression forecast",
+      "Solar Return chart reading",
+      "Astro-Cartography and Vastu overview",
+      "60-minute in-depth consultation",
+      "Ifa & Afa Consultation",
+    ],
+  },
+  {
     id: "vip-coaching",
     name: "VIP Coaching",
     description:
-      "Exclusive Corporate Package offering personalized spiritual and astrological life mapping, ongoing guidance, and priority access.",
-    duration: "6-month coaching",
-    price: null,
+      "Three months of personalised spiritual and astrological coaching, life mapping, regular check-ins, and priority access.",
+    duration: "3-month coaching programme",
+    price: VIP_COACHING_NGN_PRICE,
     category: "coaching",
     idealFor: [
       "Full spiritual and astrological life mapping",
-      "Monthly check-ins for 6 months",
+      "Monthly check-ins throughout the 3-month programme",
       "Emergency astrological guidance on demand",
       "Compatibility analysis for up to 3 partners",
       "Dedicated astrologer and priority booking",
@@ -233,7 +259,6 @@ const isConfirmed = computed(() => step.value === "confirmed");
 
 const amount = computed(() => {
   if (!selectedReading.value) return 0;
-  if (isVip.value) return 0;
   if (isMasterClass.value && paymentPlan.value === "stage") {
     return 300000;
   }
@@ -260,7 +285,6 @@ const detailsValid = computed(() => {
 
 const transferValid = computed(
   () =>
-    isVip.value ||
     (transferReference.value.trim().length > 0 &&
       transferReference.value.trim().length <= 100),
 );
@@ -269,7 +293,9 @@ const formatPrice = (price: number) =>
   `₦${price.toLocaleString("en-NG")}`;
 
 const formatPackagePrice = (item: Package) =>
-  item.price === null ? "On request" : formatPrice(item.price);
+  item.id === "vip-coaching"
+    ? `$${VIP_COACHING_USD_PRICE.toLocaleString("en-US")} / 3 months · ${formatPrice(VIP_COACHING_NGN_PRICE)}`
+    : item.price === null ? "On request" : formatPrice(item.price);
 
 const selectReading = (item: Package) => {
   selectedReadingId.value = item.id;
@@ -350,9 +376,7 @@ const submitBooking = async () => {
         ...(isMasterClass.value
           ? { paymentPlan: paymentPlan.value }
           : {}),
-        ...(!isVip.value
-          ? { transferReference: transferReference.value.trim() }
-          : {}),
+        transferReference: transferReference.value.trim(),
       },
     });
 
@@ -802,12 +826,11 @@ watch(
                 <p class="text-xs leading-5 text-[#C58B92]/75">
                   <template v-if="isVip">
                     VIP Coaching fees and arrangements are confirmed individually.
-                    Submitting this form sends an enquiry, not a payment.
+                    The three-month programme fee is $1,500, payable in naira at the displayed indicative conversion.
                   </template>
                   <template v-else>
                     Your birth details help prepare your consultation.
-                    Your bank account details and exact payment amount will be shown
-                    on the next step. Please use those details when making your transfer.
+                    Your bank account details and payment amount will be shown on the next step. For VIP Coaching, the naira amount is an indicative conversion of $1,500 and should be confirmed with CleoAstro before transfer.
                   </template>
                 </p>
               </div>
@@ -815,7 +838,7 @@ watch(
 
             <!-- PAYMENT -->
             <div
-              v-else-if="step === 'payment' && !isVip"
+              v-else-if="step === 'payment'"
               class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
             >
               <div class="flex items-start gap-3">
@@ -835,8 +858,7 @@ watch(
                   </h3>
 
                   <p class="mt-2 text-sm leading-6 text-[#C58B92]/75">
-                    Transfer the exact amount below to the PalmPay account. You can copy
-                    each account detail using the buttons provided.
+                    Transfer the exact naira amount below to the PalmPay account. VIP Coaching is priced at $1,500 for three months; the naira equivalent is indicative and based on the displayed exchange rate. Please confirm the amount with CleoAstro before transferring. You can copy each account detail using the buttons provided.
                   </p>
                 </div>
               </div>
@@ -882,6 +904,9 @@ watch(
 
                   <p class="mt-1 text-xl font-medium text-[#C8A77A]">
                     {{ formatPrice(amount) }}
+                  </p>
+                  <p v-if="isVip" class="mt-2 text-[10px] leading-5 text-[#C58B92]/70">
+                    $1,500 for 3 months · rate used: ₦{{ USD_TO_NGN_RATE.toLocaleString("en-NG", { maximumFractionDigits: 3 }) }} / USD. Indicative conversion; confirm before payment.
                   </p>
 
                   <p
@@ -937,42 +962,6 @@ watch(
               </div>
             </div>
 
-            <!-- VIP COACHING ENQUIRY -->
-            <div
-              v-else-if="step === 'payment' && isVip"
-              class="mt-5 rounded-2xl border border-[#C8A77A]/20 bg-[#42141F]/25 p-5 sm:p-7"
-            >
-              <div class="flex items-start gap-3">
-                <div
-                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C8A77A]/25 bg-[#6B0F1A]/30"
-                >
-                  <MessageCircle class="h-5 w-5 text-[#C8A77A]" />
-                </div>
-
-                <div>
-                  <p class="text-[9px] uppercase tracking-widest text-[#C8A77A]">
-                    Personal coaching
-                  </p>
-                  <h3 class="mt-2 font-serif text-xl">
-                    Submit your coaching enquiry
-                  </h3>
-                  <p class="mt-2 text-sm leading-6 text-[#C58B92]/75">
-                    VIP Coaching fees and arrangements are personalised. Submit your
-                    enquiry and CleoAstro will reach out to discuss the programme
-                    and next steps. No payment is required at this stage.
-                  </p>
-                </div>
-              </div>
-
-              <div class="mt-5 flex gap-3 rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13]/40 p-4">
-                <Info class="mt-0.5 h-4 w-4 shrink-0 text-[#C8A77A]" />
-                <p class="text-xs leading-6 text-[#C58B92]/75">
-                  Your enquiry will be submitted for follow-up. You do not need to
-                  make a bank transfer or provide a transfer reference.
-                </p>
-              </div>
-            </div>
-
             <!-- CONFIRMATION -->
             <div
               v-else
@@ -983,7 +972,7 @@ watch(
               </div>
 
               <p class="mt-7 text-[9px] uppercase tracking-widest text-[#C8A77A]">
-                {{ isVip ? "Enquiry received" : "Booking received" }}
+                Booking received
               </p>
               <h3 class="mt-3 font-serif text-3xl">
                 Thank you, {{ bookingDetails.fullName }}.
@@ -1009,7 +998,7 @@ watch(
                 <div class="mt-4 flex justify-between gap-4">
                   <span class="text-xs text-[#C58B92]/60">Amount</span>
                   <span class="text-right text-xs text-[#C8A77A]">
-                    {{ isVip ? "On request" : formatPrice(amount) }}
+                    {{ formatPrice(amount) }}
                   </span>
                 </div>
                 <div
@@ -1032,7 +1021,7 @@ watch(
                     </button>
                   </div>
                   <p class="mt-3 text-[10px] text-[#C58B92]/60">
-                    {{ isVip ? "Enquiry status: received" : "Payment status: awaiting verification" }}
+                    Payment status: awaiting verification
                   </p>
                 </div>
               </div>

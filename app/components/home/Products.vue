@@ -39,7 +39,7 @@ const products: Product[] = [
     description:
       "Meaningful spiritual wear designed to blend everyday style with intention, protection, and the energy of personal expression.",
     price: "₦70,000",
-    image: "/images/products/clothes.png",
+    image: "/images/products/tshirt.png",
   },
   {
     id: 3,

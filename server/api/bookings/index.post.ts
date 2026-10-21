@@ -9,6 +9,8 @@ import Booking, {
   type PackageId,
   type MasterClassPaymentPlan,
 } from "../../models/booking.model";
+import { dbConnect } from "../../utils/db";
+
 
 interface BookingBody {
   readingId: PackageId;

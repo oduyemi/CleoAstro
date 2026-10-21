@@ -4,6 +4,7 @@ import About from "@/components/home/About.vue";
 import Readings from "@/components/home/PersonalDailyHoroscope.vue";
 import PersonalDailyHoroscope from "@/components/home/Readings.vue";
 import MoonNow from "@/components/home/MoonNow.vue";
+import BulletinAd from "@/components/common/BulletinAd.vue";
 import Products from "@/components/home/Products.vue";
 import Ifa from "@/components/home/Ifa.vue";
 import Donations from "@/components/home/Donations.vue";
@@ -15,6 +16,7 @@ import Donations from "@/components/home/Donations.vue";
     <About />
     <PersonalDailyHoroscope />
     <MoonNow />
+    <BulletinAd />
     <Readings />    
     <Products />
     <Ifa />
