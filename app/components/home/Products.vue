@@ -79,7 +79,7 @@ const products: Product[] = [
     description:
       "Comfortable everyday footwear infused with the Cleo Astro spirit, designed for relaxed movement and effortless personal style.",
     price: "₦100,000",
-    image: "/images/products/flipflop.png",
+    image: "/images/products/flipflop.jpeg",
   },
   {
     id: 7,
