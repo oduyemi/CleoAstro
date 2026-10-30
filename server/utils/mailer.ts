@@ -106,7 +106,7 @@ export async function sendBookingNotification(
   
     await transporter.sendMail({
       from: `"Cleo Astro" <${SMTP_USER}>`,
-      to: "yhermii@gmail.com",
+      to: "okechukwu@cleoastro.com",
       replyTo: {
         name: booking.fullName,
         address: booking.email,
@@ -455,7 +455,7 @@ interface AdvertEnquiryNotification {
   
     await transporter.sendMail({
       from: `"Cleo Astro" <${SMTP_USER}>`,
-      to: "yhermii@gmail.com",
+      to: "okechukwu@cleoastro.com",
       replyTo: {
         name: enquiry.fullName,
         address: enquiry.email,
@@ -785,7 +785,7 @@ interface ConsultationNotification {
   
     await transporter.sendMail({
       from: `"Cleo Astro" <${SMTP_USER}>`,
-      to: "yhermii@gmail.com",
+      to: "okechukwu@cleoastro.com",
       replyTo: {
         name: consultation.fullName,
         address: consultation.email,
@@ -1024,7 +1024,7 @@ interface DonationNotification {
   export const sendDonationNotification = async (
     donation: DonationNotification,
   ) => {
-    const recipient = "yhermii@gmail.com";
+    const recipient = "okechukwu@cleoastro.com";
   
     if (
       !process.env.SMTP_HOST ||
@@ -1193,7 +1193,7 @@ interface ProductOrderNotification {
   export const sendProductOrderNotification = async (
     order: ProductOrderNotification,
   ) => {
-    const recipient = "yhermii@gmail.com";
+    const recipient = "okechukwu@cleoastro.com";
   
     if (
       !process.env.SMTP_HOST ||
