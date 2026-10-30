@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import {
   ArrowUpRight,
@@ -8,121 +9,24 @@ import {
 } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { Button } from "@/components/ui/button";
+import { PRODUCT_CATALOG } from "../../../server/utils/productCatalog";
 
 interface Product {
-  id: number;
+  slug: string;
   name: string;
   category: string;
   description: string;
-  price: string;
+  price: number;
   image: string;
   number: string;
   featured?: boolean;
 }
 
-const products: Product[] = [
-  {
-    id: 1,
-    number: "01",
-    name: "Cleo Astro Beeds",
-    category: "Spiritual Jewelry",
-    description:
-      "A symbolic beaded piece created for everyday wear, personal intention, and connection to your spiritual journey.",
-    price: "₦50,000",
-    image: "/images/products/beads.png",
-  },
-  {
-    id: 2,
-    number: "02",
-    name: "Cleo Astra Clothes",
-    category: "Spiritual Wears",
-    description:
-      "Meaningful spiritual wear designed to blend everyday style with intention, protection, and the energy of personal expression.",
-    price: "₦70,000",
-    image: "/images/products/tshirt.png",
-  },
-  {
-    id: 3,
-    number: "03",
-    name: "Cleo Astro Cap",
-    category: "Apparel",
-    description:
-      "A distinctive everyday cap inspired by the cosmos, crafted to carry the Cleo Astro spirit with effortless style.",
-    price: "₦50,000",
-    image: "/images/products/cap2.jpeg",
-  },
-  {
-    id: 4,
-    number: "04",
-    name: "Cleo Astro Perfumes",
-    category: "Perfume",
-    description:
-      "A refined fragrance experience created to complement your presence, evoke intention, and leave a memorable impression.",
-    price: "₦70,000",
-    image: "/images/products/perfumes.png",
-  },
-  {
-    id: 5,
-    number: "05",
-    name: "Cosmic Dogs",
-    category: "Dogs",
-    description:
-      "Thoughtfully selected companion dogs for those seeking a loyal, meaningful presence and a deeper connection with their everyday journey.",
-    price: "₦150,000",
-    image: "/images/products/dog.png",
-  },
-  {
-    id: 6,
-    number: "06",
-    name: "Sacred Flip Flops",
-    category: "Apparel",
-    description:
-      "Comfortable everyday footwear infused with the Cleo Astro spirit, designed for relaxed movement and effortless personal style.",
-    price: "₦100,000",
-    image: "/images/products/flipflop.jpeg",
-  },
-  {
-    id: 7,
-    number: "07",
-    name: "Astrology Jalamai",
-    category: "Apparel",
-    description:
-      "A distinctive piece inspired by astrology and spiritual tradition, created as a wearable expression of identity, intention, and personal alignment.",
-    price: "₦30,000",
-    image: "/images/products/jalamia.png",
-  },
-  {
-    id: 8,
-    number: "08",
-    name: "Sea Water",
-    category: "Spiritual Jewelry",
-    description:
-      "A carefully presented spiritual essential inspired by the cleansing, renewing, and transformative qualities associated with the sea.",
-    price: "₦5,000",
-    image: "/images/products/seawater.png",
-  },
-  {
-    id: 9,
-    number: "09",
-    name: "Salt / Alum / Nzu",
-    category: "Accessories",
-    description:
-      "Traditional spiritual essentials brought together for personal rituals, cleansing practices, and intentional everyday use.",
-    price: "₦5,000",
-    image: "/images/products/nzu.png",
-  },
-  {
-    id: 10,
-    number: "10",
-    name: "Cleo Astro Clay Pot",
-    category: "Accessories",
-    description:
-      "A handcrafted clay vessel inspired by traditional symbolism and spiritual practice, bringing an earthy, grounded presence to your space.",
-    price: "₦70,000",
-    image: "/images/products/pot.png",
-  },
-];
+const products: Product[] = PRODUCT_CATALOG.map((product) => ({
+  ...product,
+}));
 
+// Product navigation
 const activeProduct = ref(0);
 
 const currentProduct = computed<Product>(() => {
@@ -132,26 +36,130 @@ const currentProduct = computed<Product>(() => {
 const productCount = computed(() => products.length);
 
 const nextProduct = () => {
-  activeProduct.value =
-    (activeProduct.value + 1) % products.length;
+  if (!products.length) return;
+
+  activeProduct.value = (activeProduct.value + 1) % products.length;
 };
 
 const previousProduct = () => {
+  if (!products.length) return;
+
   activeProduct.value =
     (activeProduct.value - 1 + products.length) % products.length;
 };
 
 const selectProduct = (index: number) => {
-  activeProduct.value = index;
+  if (index >= 0 && index < products.length) {
+    activeProduct.value = index;
+  }
 };
 
-const scrollToCollection = () => {
-  document
-    .getElementById("product-selector")
-    ?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
+// Price formatting
+const formatPrice = (price: number) =>
+  `₦${price.toLocaleString("en-NG")}`;
+
+// Checkout state
+const purchaseOpen = ref(false);
+const purchaseSubmitting = ref(false);
+const purchaseError = ref("");
+const purchaseSuccess = ref(false);
+
+const quantity = ref(1);
+
+const customerName = ref("");
+const customerEmail = ref("");
+const customerPhone = ref("");
+const deliveryAddress = ref("");
+const deliveryNotes = ref("");
+const transferReference = ref("");
+const orderReference = ref("");
+
+const bankDetails = {
+  bankName: "PalmPay",
+  accountName: "CLEOASTRO(Samuel)",
+  accountNumber: "8995618317",
+};
+
+// Order calculations
+const productSlug = computed(() => currentProduct.value.slug);
+
+const orderTotal = computed(
+  () => currentProduct.value.price * quantity.value,
+);
+
+const formattedOrderTotal = computed(() => formatPrice(orderTotal.value));
+
+// Checkout actions
+const openPurchase = () => {
+  purchaseOpen.value = true;
+  purchaseError.value = "";
+  purchaseSuccess.value = false;
+  quantity.value = 1;
+};
+
+const closePurchase = () => {
+  if (purchaseSubmitting.value) return;
+
+  purchaseOpen.value = false;
+};
+
+const submitProductOrder = async () => {
+  if (purchaseSubmitting.value) return;
+
+  purchaseSubmitting.value = true;
+  purchaseError.value = "";
+
+  try {
+    const response = await $fetch<{
+      success: boolean;
+      message: string;
+      data: {
+        reference: string;
+        totalAmount: number;
+      };
+    }>("/api/products/orders", {
+      method: "POST",
+      body: {
+        productSlug: productSlug.value,
+        quantity: quantity.value,
+        fullName: customerName.value.trim(),
+        email: customerEmail.value.trim(),
+        phone: customerPhone.value.trim(),
+        deliveryAddress: deliveryAddress.value.trim(),
+        deliveryNotes: deliveryNotes.value.trim(),
+        transferReference: transferReference.value.trim(),
+      },
     });
+
+    orderReference.value = response.data.reference;
+    purchaseSuccess.value = true;
+  } catch (error: any) {
+    purchaseError.value =
+      error?.data?.statusMessage ||
+      error?.data?.message ||
+      "We could not submit your order. Please try again.";
+  } finally {
+    purchaseSubmitting.value = false;
+  }
+};
+
+// Collection navigation
+const scrollToCollection = () => {
+  document.getElementById("product-selector")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+};
+
+// Bank details
+const copyProductAccountNumber = async () => {
+  if (!import.meta.client) return;
+
+  try {
+    await navigator.clipboard.writeText(bankDetails.accountNumber);
+  } catch {
+    purchaseError.value = "Unable to copy the account number.";
+  }
 };
 </script>
 
@@ -310,7 +318,7 @@ const scrollToCollection = () => {
               leave-to-class="scale-105 opacity-0"
             >
               <img
-                :key="currentProduct.id"
+                :key="currentProduct.slug"
                 :src="currentProduct.image"
                 :alt="currentProduct.name"
                 class="h-full w-full object-contain drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)]"
@@ -443,6 +451,7 @@ const scrollToCollection = () => {
             <div>
               <Button
                 type="button"
+                @click="openPurchase"
                 class="group h-13 w-full rounded-full border border-[#C8A77A]/30 bg-[#6B0F1A] px-5 text-[10px] uppercase tracking-[0.18em] text-[#F1E8E3] shadow-[0_15px_40px_rgba(107,15,26,0.22)] transition-all duration-500 hover:bg-[#7E3541] hover:shadow-[0_18px_50px_rgba(107,15,26,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8A77A]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#160B10]"
               >
                 <ShoppingBag class="mr-2 h-4 w-4" />
@@ -543,7 +552,7 @@ const scrollToCollection = () => {
         >
           <button
             v-for="(product, index) in products"
-            :key="product.id"
+            :key="product.slug"
             type="button"
             @click="selectProduct(index)"
             :aria-label="`View ${product.name}`"
@@ -613,7 +622,7 @@ const scrollToCollection = () => {
               <span
                 class="shrink-0 font-serif text-sm text-[#F1E8E3]/45"
               >
-                {{ product.price }}
+                {{ formatPrice(product.price) }}
               </span>
             </div>
           </button>
@@ -683,4 +692,282 @@ const scrollToCollection = () => {
       </div>
     </div>
   </section>
+
+  
+<Teleport to="body">
+  <Transition name="donation-dialog">
+    <div
+      v-if="purchaseOpen"
+      class="fixed inset-0 z-[120] flex items-center justify-center overflow-y-auto p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-checkout-title"
+      @click.self="closePurchase"
+    >
+      <div class="absolute inset-0 bg-[#080507]/85 backdrop-blur-md" />
+
+      <div
+        class="relative my-auto max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[1.75rem] border border-[#C58B92]/15 bg-[#160B10] text-[#F1E8E3] shadow-[0_35px_120px_rgba(0,0,0,.55)]"
+      >
+        <div class="flex items-start justify-between border-b border-[#C58B92]/10 px-6 py-6">
+          <div>
+            <p class="text-[9px] uppercase tracking-[0.28em] text-[#C8A77A]/65">
+              Cleo Astro Shop
+            </p>
+            <h2
+              id="product-checkout-title"
+              class="mt-2 font-serif text-2xl"
+            >
+              {{ purchaseSuccess ? "Order received" : "Complete your order" }}
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Close checkout"
+            :disabled="purchaseSubmitting"
+            @click="closePurchase"
+            class="flex h-9 w-9 items-center justify-center rounded-full border border-[#C58B92]/15 text-xl text-[#F1E8E3]/50 hover:text-[#F1E8E3] disabled:opacity-30"
+          >
+            ×
+          </button>
+        </div>
+
+        <div v-if="!purchaseSuccess" class="space-y-6 p-6">
+          <!-- Product summary -->
+          <div class="flex items-center gap-4 rounded-2xl border border-[#C58B92]/10 bg-[#1D0C13] p-4">
+            <div class="h-20 w-20 shrink-0 rounded-xl bg-[#261018] p-2">
+              <img
+                :src="currentProduct.image"
+                :alt="currentProduct.name"
+                class="h-full w-full object-contain"
+              />
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <p class="text-[8px] uppercase tracking-[0.2em] text-[#C8A77A]/60">
+                {{ currentProduct.category }}
+              </p>
+              <h3 class="mt-1 font-serif text-lg">
+                {{ currentProduct.name }}
+              </h3>
+              <p class="mt-1 text-xs text-[#F1E8E3]/40">
+                {{ formatPrice(currentProduct.price) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="flex items-center justify-between">
+            <label class="text-[9px] uppercase tracking-[0.2em] text-[#C8A77A]/60">
+              Quantity
+            </label>
+
+            <div class="flex items-center gap-4">
+              <button
+                type="button"
+                @click="quantity = Math.max(1, quantity - 1)"
+                class="flex h-9 w-9 items-center justify-center rounded-full border border-[#C58B92]/15"
+              >
+                −
+              </button>
+
+              <span class="min-w-5 text-center font-mono text-sm">
+                {{ quantity }}
+              </span>
+
+              <button
+                type="button"
+                @click="quantity = Math.min(20, quantity + 1)"
+                class="flex h-9 w-9 items-center justify-center rounded-full border border-[#C58B92]/15"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between border-t border-[#C58B92]/10 pt-4">
+            <span class="text-[9px] uppercase tracking-[0.2em] text-[#F1E8E3]/40">
+              Order total
+            </span>
+            <span class="font-serif text-2xl text-[#C8A77A]">
+              {{ formattedOrderTotal }}
+            </span>
+          </div>
+
+          <!-- Customer information -->
+          <div class="space-y-4">
+            <p class="text-[9px] font-semibold uppercase tracking-[0.24em] text-[#C8A77A]/65">
+              Your information
+            </p>
+
+            <input
+              v-model="customerName"
+              type="text"
+              autocomplete="name"
+              placeholder="Full name"
+              required
+              class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] px-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+            />
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <input
+                v-model="customerEmail"
+                type="email"
+                autocomplete="email"
+                placeholder="Email address"
+                required
+                class="h-12 min-w-0 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] px-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+              />
+
+              <input
+                v-model="customerPhone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="Phone number"
+                required
+                class="h-12 min-w-0 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] px-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+              />
+            </div>
+
+            <textarea
+              v-model="deliveryAddress"
+              rows="3"
+              placeholder="Complete delivery address"
+              required
+              class="w-full resize-none rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] p-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+            />
+
+            <textarea
+              v-model="deliveryNotes"
+              rows="2"
+              placeholder="Additional delivery instructions (optional)"
+              class="w-full resize-none rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] p-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+            />
+          </div>
+
+          <!-- Bank details -->
+          <div class="rounded-2xl border border-[#C8A77A]/15 bg-[#1D0C13] p-5">
+            <p class="text-[9px] uppercase tracking-[0.22em] text-[#C8A77A]/65">
+              Bank transfer details
+            </p>
+
+            <div class="mt-4 space-y-3">
+              <div class="flex justify-between gap-4 text-xs">
+                <span class="text-[#F1E8E3]/35">Bank</span>
+                <span>{{ bankDetails.bankName }}</span>
+              </div>
+
+              <div class="flex justify-between gap-4 text-xs">
+                <span class="text-[#F1E8E3]/35">Account name</span>
+                <span>{{ bankDetails.accountName }}</span>
+              </div>
+
+              <div class="flex justify-between gap-4 text-xs">
+                <span class="text-[#F1E8E3]/35">Account number</span>
+                <button
+                  type="button"
+                  class="font-mono text-[#C8A77A]"
+                  @click="copyProductAccountNumber"
+                >
+                  {{ bankDetails.accountNumber }} · Copy
+                </button>
+              </div>
+
+              <div class="flex justify-between gap-4 border-t border-[#C58B92]/10 pt-3 text-sm">
+                <span class="text-[#F1E8E3]/45">Transfer amount</span>
+                <span class="font-serif text-lg text-[#C8A77A]">
+                  {{ formattedOrderTotal }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="mb-2 block text-[9px] uppercase tracking-[0.22em] text-[#C8A77A]/65">
+              Bank transfer reference *
+            </label>
+
+            <input
+              v-model="transferReference"
+              type="text"
+              placeholder="Enter your transaction reference"
+              required
+              class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13] px-4 text-sm outline-none placeholder:text-[#F1E8E3]/25 focus:border-[#C8A77A]/35"
+            />
+          </div>
+
+          <p
+            v-if="purchaseError"
+            role="alert"
+            class="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-xs leading-5 text-red-300"
+          >
+            {{ purchaseError }}
+          </p>
+
+          <button
+            type="button"
+            :disabled="
+              purchaseSubmitting ||
+              !customerName.trim() ||
+              !customerEmail.trim() ||
+              !customerPhone.trim() ||
+              !deliveryAddress.trim() ||
+              !transferReference.trim()
+            "
+            @click="submitProductOrder"
+            class="flex h-14 w-full items-center justify-center rounded-full border border-[#C8A77A]/30 bg-[#6B0F1A] text-xs font-medium text-[#F1E8E3] transition-all hover:bg-[#7E3541] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {{
+              purchaseSubmitting
+                ? "Submitting order..."
+                : "I've made the transfer"
+            }}
+          </button>
+
+          <p class="text-center text-[9px] leading-5 text-[#F1E8E3]/25">
+            Your order will be processed after payment verification.
+          </p>
+        </div>
+
+        <!-- Success -->
+        <div v-else class="px-6 py-12 text-center">
+          <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#C8A77A]/25 bg-[#1D0C13]">
+            <ShoppingBag class="h-8 w-8 text-[#C8A77A]" />
+          </div>
+
+          <p class="mt-7 text-[9px] uppercase tracking-[0.3em] text-[#C8A77A]/65">
+            Thank you
+          </p>
+
+          <h3 class="mt-3 font-serif text-3xl">
+            Your order has been received.
+          </h3>
+
+          <p class="mx-auto mt-4 max-w-sm text-sm leading-7 text-[#F1E8E3]/45">
+            Your order is awaiting payment verification. We will follow up using the contact details you provided.
+          </p>
+
+          <div class="mt-7 rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13] p-4">
+            <p class="text-[8px] uppercase tracking-[0.2em] text-[#F1E8E3]/35">
+              Order reference
+            </p>
+            <p class="mt-2 font-mono text-sm text-[#C8A77A]">
+              {{ orderReference }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            @click="closePurchase"
+            class="mt-8 h-12 rounded-full border border-[#C58B92]/15 bg-[#261018] px-8 text-xs text-[#F1E8E3]/70 transition hover:bg-[#42141F]"
+          >
+            Return to collection
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+</Teleport>
+
 </template>

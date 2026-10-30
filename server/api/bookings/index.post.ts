@@ -1,16 +1,8 @@
-import {
-  createError,
-  defineEventHandler,
-  readBody,
-} from "h3";
+import { createError, defineEventHandler, readBody } from "h3";
 import { randomUUID } from "node:crypto";
-import Booking, {
-  type IBooking,
-  type PackageId,
-  type MasterClassPaymentPlan,
-} from "../../models/booking.model";
+import Booking, { type IBooking, type PackageId, type MasterClassPaymentPlan } from "../../models/booking.model";
 import { dbConnect } from "../../utils/db";
-
+import { sendBookingNotification } from "../../utils/mailer";
 
 interface BookingBody {
   readingId: PackageId;
@@ -51,26 +43,31 @@ const createBookingReference = (): string =>
 export default defineEventHandler(async (event) => {
   try {
     await dbConnect();
-  } catch {
+  } catch (error) {
+    console.error("Booking database connection error:", error);
+
     throw createError({
       statusCode: 503,
       statusMessage:
         "The booking service is temporarily unavailable. Please try again later.",
     });
-  }    
+  }
+
   const body = await readBody<Partial<BookingBody>>(event);
 
   const readingId = clean(body.readingId) as PackageId;
   const fullName = clean(body.fullName);
   const email = clean(body.email).toLowerCase();
   const phone = clean(body.phone);
+
   const birthDate = clean(body.birthDate);
   const birthTime = clean(body.birthTime);
   const birthPlace = clean(body.birthPlace);
+
   const question = clean(body.question);
   const transferReference = clean(body.transferReference);
 
-  // Only allow the two valid payment plans.
+  // Validate payment plan
   const rawPaymentPlan = clean(body.paymentPlan);
 
   const paymentPlan: MasterClassPaymentPlan | undefined =
@@ -87,6 +84,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Validate customer details
   if (fullName.length < 2 || fullName.length > 150) {
     throw createError({
       statusCode: 400,
@@ -115,6 +113,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Package conditions
   const isVip = readingId === "vip-coaching";
   const isMasterClass = readingId === "master-class";
 
@@ -160,6 +159,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Calculate payment amount
   const amount =
     isVip
       ? 0
@@ -175,6 +175,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const reference = createBookingReference();
+
   const payment: IBooking["payment"] = {
     method: "bank-transfer",
     status: isVip ? "unpaid" : "transfer-reported",
@@ -184,52 +185,90 @@ export default defineEventHandler(async (event) => {
     ...(paymentPlan ? { plan: paymentPlan } : {}),
   };
 
+  // Create booking
   try {
     const booking = await Booking.create({
       reference,
+
       reading: {
         id: readingId,
         name: selectedPackage.name,
         amount,
         currency: "NGN",
       },
+
       customer: {
         fullName,
         email,
         phone,
       },
+
       birthDetails: {
         date: birthDate,
         time: birthTime,
         place: birthPlace,
       },
+
       question,
       payment,
+
       status: isVip
         ? "pending"
         : "awaiting-payment-verification",
     });
 
+    // Send notification email
+    try {
+      await sendBookingNotification({
+        reference: booking.reference,
+        fullName,
+        email,
+        phone,
+        packageName: selectedPackage.name,
+        amount,
+        currency: "NGN",
+        paymentStatus: booking.payment.status,
+        paymentPlan: booking.payment.plan,
+        transferReference,
+        birthDate,
+        birthTime,
+        birthPlace,
+        question,
+        status: booking.status,
+      });
+    } catch (emailError) {
+      console.error(
+        "Failed to send booking notification email:",
+        emailError
+      );
+    }
+
+    // Return successful response
     return {
       success: true,
+
       message: isVip
         ? "Your VIP Coaching enquiry has been received."
         : "Your booking has been received and is awaiting payment verification.",
+
       booking: {
         id: booking._id.toString(),
         reference: booking.reference,
+
         reading: {
           id: readingId,
           name: selectedPackage.name,
           amount,
           currency: "NGN" as const,
         },
+
         paymentStatus: booking.payment.status,
         paymentPlan: booking.payment.plan,
         status: booking.status,
         createdAt: booking.createdAt,
       },
     };
+
   } catch (error: unknown) {
     console.error("Booking creation error:", error);
 

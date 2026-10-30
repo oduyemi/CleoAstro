@@ -1,23 +1,21 @@
-import {
-    createError,
-    defineEventHandler,
-    readBody,
-  } from "h3";
-  import Consultation from "../../models/consultation.model";
-  import { dbConnect } from "../../utils/db";
-  type ConsultationType = "ifa" | "afa";
+import { createError, defineEventHandler, readBody } from "h3";
+import Consultation from "../../models/consultation.model";
+import { dbConnect } from "../../utils/db";
+import { sendConsultationNotification } from "../../utils/mailer";
   
-  interface ConsultationBody {
-    consultationType: ConsultationType;
-    fullName: string;
-    email: string;
-    phone: string;
-    birthDate?: string;
-    birthTime?: string;
-    birthPlace?: string;
-    question: string;
-    transferReference: string;
-  }
+type ConsultationType = "ifa" | "afa";
+  
+interface ConsultationBody {
+  consultationType: ConsultationType;
+  fullName: string;
+  email: string;
+  phone: string;
+  birthDate?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  question: string;
+  transferReference: string;
+}
 
   
 
@@ -153,81 +151,108 @@ import {
       });
     }
   
-    const reference = createReference();
-  
+    
+  const reference = createReference();
+
+  try {
+    const consultationRecord = await Consultation.create({
+      reference,
+
+      consultation: {
+        type: consultationType,
+        name: consultation.name,
+        amount: consultation.amount,
+        currency: "NGN",
+      },
+
+      client: {
+        fullName,
+        email,
+        phone,
+      },
+
+      birthDetails: {
+        date: birthDate || undefined,
+        time: birthTime || undefined,
+        place: birthPlace || undefined,
+      },
+
+      question,
+
+      payment: {
+        method: "bank-transfer",
+        status: "transfer-reported",
+        transferReference,
+        amount: consultation.amount,
+        currency: "NGN",
+      },
+
+      status: "awaiting-payment-verification",
+    });
+
+    // Send consultation notification email.
     try {
-      const consultationRecord =
-        await Consultation.create({
-          reference,
-  
-          consultation: {
-            type: consultationType,
-            name: consultation.name,
-            amount: consultation.amount,
-            currency: "NGN",
-          },
-  
-          client: {
-            fullName,
-            email,
-            phone,
-          },
-  
-          birthDetails: {
-            date: birthDate || undefined,
-            time: birthTime || undefined,
-            place: birthPlace || undefined,
-          },
-  
-          question,
-  
-          payment: {
-            method: "bank-transfer",
-            status: "transfer-reported",
-            transferReference,
-            amount: consultation.amount,
-            currency: "NGN",
-          },
-  
-          status:
-            "awaiting-payment-verification",
-        });
-  
-      return {
-        success: true,
-  
-        message:
-          "Your consultation request has been received and is awaiting payment verification.",
-  
-        consultation: {
-          id: consultationRecord._id.toString(),
-          reference: consultationRecord.reference,
-          status: consultationRecord.status,
-        },
-      };
-    } catch (error: unknown) {
+      await sendConsultationNotification({
+        reference: consultationRecord.reference,
+        consultationType,
+        consultationName: consultation.name,
+        amount: consultation.amount,
+        currency: "NGN",
+        fullName,
+        email,
+        phone,
+        birthDate,
+        birthTime,
+        birthPlace,
+        question,
+        transferReference,
+        paymentStatus: consultationRecord.payment.status,
+        status: consultationRecord.status,
+      });
+    } catch (emailError) {
       console.error(
-        "Consultation creation error:",
-        error
+        "Failed to send consultation notification email:",
+        emailError
       );
-  
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        (error as { code?: number }).code === 11000
-      ) {
-        throw createError({
-          statusCode: 409,
-          statusMessage:
-            "A consultation with this reference already exists.",
-        });
-      }
-  
+    }
+
+    // Return successful response.
+    return {
+      success: true,
+
+      message:
+        "Your consultation request has been received and is awaiting payment verification.",
+
+      consultation: {
+        id: consultationRecord._id.toString(),
+        reference: consultationRecord.reference,
+        status: consultationRecord.status,
+      },
+    };
+
+  } catch (error: unknown) {
+    console.error(
+      "Consultation creation error:",
+      error
+    );
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000
+    ) {
       throw createError({
-        statusCode: 500,
+        statusCode: 409,
         statusMessage:
-          "We could not submit your consultation. Please try again.",
+          "A consultation with this reference already exists.",
       });
     }
-  });
+
+    throw createError({
+      statusCode: 500,
+      statusMessage:
+        "We could not submit your consultation. Please try again.",
+    });
+  }
+});

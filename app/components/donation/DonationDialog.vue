@@ -22,6 +22,13 @@ const emit = defineEmits<{
 
 type DonationStep = "amount" | "transfer" | "complete";
 
+const fullName = ref("");
+const donorEmail = ref("");
+const phone = ref("");
+const transferReference = ref("");
+const submissionError = ref("");
+const donationReference = ref("");
+
 const step = ref<DonationStep>("amount");
 const amount = ref("");
 const copied = ref(false);
@@ -58,6 +65,12 @@ const resetDialog = () => {
   amount.value = "";
   copied.value = false;
   submitting.value = false;
+  fullName.value = "";
+  donorEmail.value = "";
+  phone.value = "";
+  transferReference.value = "";
+  submissionError.value = "";
+  donationReference.value = "";
 };
 
 const handleOpenChange = (value: boolean) => {
@@ -105,26 +118,39 @@ const copyAccountNumber = async () => {
 };
 
 const confirmTransfer = async () => {
-  if (submitting.value) return;
+  if (submitting.value || !transferReference.value.trim()) return;
 
   submitting.value = true;
+  submissionError.value = "";
 
-  /*
-   * This is intentionally only a UI confirmation.
-   *
-   * When your backend is ready, this is where you can POST:
-   * - donation amount
-   * - donor name/email
-   * - reference
-   * - selected cause
-   *
-   * The bank transfer itself should be verified separately.
-   */
+  try {
+    const response = await $fetch<{
+      success: boolean;
+      message: string;
+      data: {
+        reference: string;
+      };
+    }>("/api/donations", {
+      method: "POST",
+      body: {
+        amount: Number(amount.value.replace(/,/g, "")),
+        fullName: fullName.value.trim(),
+        email: donorEmail.value.trim(),
+        phone: phone.value.trim(),
+        transferReference: transferReference.value.trim(),
+      },
+    });
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  submitting.value = false;
-  step.value = "complete";
+    donationReference.value = response.data.reference;
+    step.value = "complete";
+  } catch (error: any) {
+    submissionError.value =
+      error?.data?.statusMessage ||
+      error?.data?.message ||
+      "We could not submit your donation. Please try again.";
+  } finally {
+    submitting.value = false;
+  }
 };
 
 watch(
@@ -449,6 +475,91 @@ watch(
                   </p>
                 </div>
 
+                <!-- Donor information -->
+                <div class="mt-7 space-y-4">
+                  <div>
+                    <label
+                      for="donor-name"
+                      class="mb-2 block text-[9px] font-semibold uppercase tracking-[0.25em] text-[#C8A77A]/55"
+                    >
+                      Your name
+                    </label>
+                    <input
+                      id="donor-name"
+                      v-model="fullName"
+                      type="text"
+                      autocomplete="name"
+                      placeholder="Full name (optional)"
+                      class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/70 px-4 text-sm text-[#F1E8E3] outline-none placeholder:text-[#F1E8E3]/20 focus:border-[#C8A77A]/35"
+                    />
+                  </div>
+
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        for="donor-email"
+                        class="mb-2 block text-[9px] font-semibold uppercase tracking-[0.25em] text-[#C8A77A]/55"
+                      >
+                        Email address
+                      </label>
+                      <input
+                        id="donor-email"
+                        v-model="donorEmail"
+                        type="email"
+                        autocomplete="email"
+                        placeholder="Email (optional)"
+                        class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/70 px-4 text-sm text-[#F1E8E3] outline-none placeholder:text-[#F1E8E3]/20 focus:border-[#C8A77A]/35"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        for="donor-phone"
+                        class="mb-2 block text-[9px] font-semibold uppercase tracking-[0.25em] text-[#C8A77A]/55"
+                      >
+                        Phone number
+                      </label>
+                      <input
+                        id="donor-phone"
+                        v-model="phone"
+                        type="tel"
+                        autocomplete="tel"
+                        placeholder="Phone (optional)"
+                        class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/70 px-4 text-sm text-[#F1E8E3] outline-none placeholder:text-[#F1E8E3]/20 focus:border-[#C8A77A]/35"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      for="transfer-reference"
+                      class="mb-2 block text-[9px] font-semibold uppercase tracking-[0.25em] text-[#C8A77A]/55"
+                    >
+                      Bank transfer reference *
+                    </label>
+                    <input
+                      id="transfer-reference"
+                      v-model="transferReference"
+                      type="text"
+                      autocomplete="off"
+                      placeholder="Enter your transaction reference"
+                      required
+                      class="h-12 w-full rounded-xl border border-[#C58B92]/10 bg-[#1D0C13]/70 px-4 text-sm text-[#F1E8E3] outline-none placeholder:text-[#F1E8E3]/20 focus:border-[#C8A77A]/35"
+                    />
+                    <p class="mt-2 text-[10px] leading-5 text-[#F1E8E3]/25">
+                      Enter the transaction reference shown by your bank or payment app.
+                    </p>
+                  </div>
+
+                  <p
+                    v-if="submissionError"
+                    role="alert"
+                    class="rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-xs leading-5 text-red-300"
+                  >
+                    {{ submissionError }}
+                  </p>
+                </div>
+
                 <!-- Bank details -->
 
                 <div
@@ -594,16 +705,12 @@ watch(
 
                 <button
                   type="button"
-                  :disabled="submitting"
+                  :disabled="submitting || !transferReference.trim()"
                   class="group mt-7 flex h-14 w-full items-center justify-center rounded-full border border-[#C8A77A]/30 bg-[#6B0F1A] text-xs font-medium text-[#F1E8E3] shadow-[0_15px_40px_rgba(107,15,26,.20)] transition-all duration-500 hover:-translate-y-0.5 hover:border-[#C8A77A]/50 hover:bg-[#7E3541] disabled:cursor-wait disabled:opacity-60"
                   @click="confirmTransfer"
                 >
                   <span>
-                    {{
-                      submitting
-                        ? "Confirming..."
-                        : "I've made the transfer"
-                    }}
+                    {{ submitting ? "Submitting donation..." : "I've made the transfer" }}
                   </span>
 
                   <Check
@@ -671,6 +778,17 @@ watch(
                   </span>
                   represents care, support, and possibility.
                 </p>
+                <div
+                  v-if="donationReference"
+                  class="mx-auto mt-5 max-w-md rounded-xl border border-[#C8A77A]/15 bg-[#1D0C13]/60 px-5 py-4"
+                >
+                  <p class="text-[8px] uppercase tracking-[0.22em] text-[#F1E8E3]/30">
+                    Donation reference
+                  </p>
+                  <p class="mt-2 font-mono text-sm tracking-wide text-[#C8A77A]">
+                    {{ donationReference }}
+                  </p>
+                </div>
 
                 <!-- Thank you note -->
 

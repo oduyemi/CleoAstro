@@ -2,6 +2,7 @@
 import AdPlacement from "../models/adPlacement.model";
 import type { IAdPlacement } from "../models/adPlacement.model";
 import { dbConnect } from "../utils/db";
+import { sendAdvertEnquiryNotification } from "../utils/mailer";
 
 
 type AdvertEnquiryBody = {
@@ -252,11 +253,39 @@ export default defineEventHandler(async (event) => {
     };
       
     const enquiry = await AdPlacement.create(enquiryData);
-      
-    return {
-        success: true,
-        message: "Your advertising enquiry has been received.",
+    try {
+      await sendAdvertEnquiryNotification({
         enquiryId: enquiry._id.toString(),
+        fullName,
+        email,
+        phone,
+        businessName,
+        website,
+        industry,
+        advertType,
+        advertDescription,
+        campaignGoal,
+        targetAudience,
+        placement,
+        budget,
+        startDate: startDate?.toISOString().slice(0, 10),
+        endDate: endDate?.toISOString().slice(0, 10),
+        destinationUrl,
+        assetUrl,
+        additionalNotes,
+        source,
+      });
+    } catch (emailError) {
+      console.error(
+        "Failed to send advertising enquiry notification:",
+        emailError
+      );
+    }
+    
+    return {
+      success: true,
+      message: "Your advertising enquiry has been received.",
+      enquiryId: enquiry._id.toString(),
     };
   } catch (error: unknown) {
     if (
